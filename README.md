@@ -1,8 +1,8 @@
-###define table, initlize dictionary data\n
+####define table, initlize dictionary data
 source /home/ts/db.sql
 
-###get finance data through python interface\n
+####get finance data through python interface
 python /home/ts/data_init.py
 
-###data process\n
+####data process
 source /home/ts/data_process.sql
