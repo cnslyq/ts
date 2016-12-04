@@ -19,6 +19,7 @@ if not ts.is_holiday(str(today)):
   print
   print('trade_today_market done')
   
+  start = datetime.datetime.today()
   codes = [item[0] for item in ts.get_area_classified().values]
   for code in codes:
     df = ts.get_sina_dd(code, today, vol=5000)
