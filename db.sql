@@ -1,9 +1,9 @@
 use mysql;
 
-source /home/ts/sql/common_ddl.sql
-source /home/ts/sql/stock_ddl.sql
-source /home/ts/sql/trade_ddl.sql
+source ./sql/common_ddl.sql
+source ./sql/stock_ddl.sql
+source ./sql/trade_ddl.sql
 
-source /home/ts/sql/common_dml.sql
+source ./sql/common_dml.sql
 
 commit;
