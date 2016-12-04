@@ -17,3 +17,5 @@ if not ts.is_holiday(str(today)):
   df.to_sql('trade_today_market',engine,if_exists='append')
   print
   print('trade_today_market done')
+else:
+  print('Today is a holiday ~')
