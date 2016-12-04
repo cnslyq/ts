@@ -24,6 +24,7 @@ if not ts.is_holiday(str(today)):
   for code in codes:
     df = ts.get_sina_dd(code, today, vol=5000)
     if df is not None:
+      df['date'] = today
       df.to_sql('trade_block_trade', engine, if_exists='append')
   end = datetime.datetime.today()
   print('cost time : ' + str(end - start))

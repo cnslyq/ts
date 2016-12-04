@@ -12,6 +12,7 @@ print(len(codes))
 for code in codes:
   df = ts.get_sina_dd(code, today, vol=5000)
   if df is not None:
+    df['date'] = today
     df.to_sql('trade_block_trade', engine, if_exists='append')
 print
 end = datetime.datetime.today()
