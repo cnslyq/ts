@@ -1,6 +1,7 @@
 drop table if exists trade_history_market;
 create table trade_history_market(
-	`index` bigint(20) primary key not null,
+	`id` bigint(20) primary key not null auto_increment,
+	`index` int(8),
 	`date` date,
 	`open` double,
 	`close` double,
@@ -15,7 +16,8 @@ alter table trade_history_market add index trade_history_market_code_idx (`code`
 
 drop table if exists trade_today_market; 
 create table trade_today_market(
-	`index` bigint(20) primary key not null,
+	`id` bigint(20) primary key not null auto_increment,
+	`index` int(4),
 	`date` date,
 	`code` varchar(8),
 	`name` varchar(16),
@@ -39,7 +41,8 @@ alter table trade_today_market add index trade_today_market_code_idx (`code`);
 
 drop table if exists trade_today_index; 
 create table trade_today_index(
-	`index` bigint(20) primary key not null,
+	`id` bigint(20) primary key not null auto_increment,
+	`index` int(2),
 	`date` date,
 	`code` varchar(8),
 	`name` varchar(16),
@@ -58,7 +61,8 @@ alter table trade_today_index add index trade_today_index_code_idx (`code`);
 
 drop table if exists trade_block_trade;
 create table trade_block_trade(
-	`index` bigint(20) primary key not null,
+	`id` bigint(20) primary key not null auto_increment,
+	`index` int(4),
 	`date` date,
 	`code` varchar(8),
 	`name` varchar(16),
