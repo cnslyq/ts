@@ -3,6 +3,7 @@ import tushare as ts
 import datetime
 
 today = datetime.date.today()
+print(datetime.datetime.today())
 if not ts.is_holiday(str(today)):
   engine = create_engine('mysql://root:123456@127.0.0.1/mysql?charset=utf8')
 
