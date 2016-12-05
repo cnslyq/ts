@@ -1,7 +1,6 @@
-drop table if exists trade_history_market;
-create table trade_history_market(
+drop table if exists trade_market_history;
+create table trade_market_history(
 	`id` bigint(20) primary key not null auto_increment,
-	`index` int(8),
 	`date` date,
 	`open` double,
 	`close` double,
@@ -11,13 +10,12 @@ create table trade_history_market(
 	`code` varchar(8),
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
-alter table trade_history_market add index trade_history_market_date_idx (`date`);
-alter table trade_history_market add index trade_history_market_code_idx (`code`);
+alter table trade_market_history add index trade_market_history_date_idx (`date`);
+alter table trade_market_history add index trade_market_history_code_idx (`code`);
 
-drop table if exists trade_today_market; 
-create table trade_today_market(
+drop table if exists trade_market_today; 
+create table trade_market_today(
 	`id` bigint(20) primary key not null auto_increment,
-	`index` int(4),
 	`date` date,
 	`code` varchar(8),
 	`name` varchar(16),
@@ -36,13 +34,12 @@ create table trade_today_market(
 	`nmc` double,
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
-alter table trade_today_market add index trade_today_market_date_idx (`date`);
-alter table trade_today_market add index trade_today_market_code_idx (`code`);
+alter table trade_market_today add index trade_market_today_date_idx (`date`);
+alter table trade_market_today add index trade_market_today_code_idx (`code`);
 
-drop table if exists trade_today_index; 
-create table trade_today_index(
+drop table if exists trade_index_today; 
+create table trade_index_today(
 	`id` bigint(20) primary key not null auto_increment,
-	`index` int(2),
 	`date` date,
 	`code` varchar(8),
 	`name` varchar(16),
@@ -56,13 +53,12 @@ create table trade_today_index(
 	`amount` double,
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
-alter table trade_today_index add index trade_today_index_date_idx (`date`);
-alter table trade_today_index add index trade_today_index_code_idx (`code`);
+alter table trade_index_today add index trade_index_today_date_idx (`date`);
+alter table trade_index_today add index trade_index_today_code_idx (`code`);
 
-drop table if exists trade_block_trade;
-create table trade_block_trade(
+drop table if exists trade_block;
+create table trade_block(
 	`id` bigint(20) primary key not null auto_increment,
-	`index` int(4),
 	`date` date,
 	`code` varchar(8),
 	`name` varchar(16),
@@ -73,7 +69,5 @@ create table trade_block_trade(
 	`type` varchar(16),
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 );
-alter table trade_block_trade add index trade_block_trade_date_idx (`date`);
-alter table trade_block_trade add index trade_block_trade_code_idx (`code`);
-
-
+alter table trade_block add index trade_block_date_idx (`date`);
+alter table trade_block add index trade_block_code_idx (`code`);
