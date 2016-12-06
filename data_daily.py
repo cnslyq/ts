@@ -8,7 +8,8 @@ today = datetime.date.today()
 print("Current Date : " + str(today))
 
 # daily
-if not ts.is_holiday(str(today)):
+# if not ts.is_holiday(str(today)):
+if True:
 	pl.log("daily task start...")
 	for item in conf.DAILY_LIST:
 		os.system('python %s%s' % (conf.PY_PATH, item))
