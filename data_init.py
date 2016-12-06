@@ -1,8 +1,8 @@
 import os
 import py.pylog as pl
+import conf
 
 pl.log("data initialization start...")
-py_list = ['stock_init.py', 'trade_init.py']
-for item in py_list:
-	os.system('python /home/ts/py/%s' % item)
+for item in conf.INIT_LIST:
+	os.system('python %s%s' % (conf.PY_PATH, item))
 pl.log("data initialization done")
