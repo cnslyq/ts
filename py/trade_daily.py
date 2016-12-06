@@ -16,7 +16,6 @@ df = ts.get_index()
 df = df.set_index('code', drop='true')
 df['date'] = today
 df.to_sql('trade_index_today', engine, if_exists='append')
-print
 pl.log("trade_index_today done")
 
 pl.log("trade_market_today start...")
@@ -37,5 +36,4 @@ for code in codes:
     df = df.set_index('code', drop='true')
     df['date'] = today
     df.to_sql('trade_block', engine, if_exists='append')
-print
 pl.log("trade_block done")
