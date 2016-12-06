@@ -1,4 +1,5 @@
 import tops_freq
-print(str(datetime.datetime.today()) + " monthly task start...")
+import pylog as pl
+pl.log("monthly task start...")
 tops_freq.tops(30)
-print(str(datetime.datetime.today()) + " monthly task done")
+pl.log("monthly task done")

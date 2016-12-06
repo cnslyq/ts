@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 import tushare as ts
 import datetime
+import pylog as pl
 
 engine = create_engine('mysql://root:123456@127.0.0.1/mysql?charset=utf8')
 Session = sessionmaker(bind=engine)
@@ -11,7 +12,7 @@ session = Session()
 sdate = datetime.date(2016, 12, 1)
 edate = datetime.date.today()
 # edate = datetime.date(2016, 12, 5)
-print(str(datetime.datetime.today()) + " trade data initialization start...")
+pl.log("trade data initialization start...")
 # codes = [item[0] for item in ts.get_area_classified().values]
 codes = session.query("code").from_statement(text("select code from stock_info")).all()
 codes = [item[0].encode('utf8') for item in codes]
@@ -32,4 +33,4 @@ for code in codes:
         df['date'] = cdate
         df.to_sql('trade_block', engine, if_exists='append')
     cdate += datetime.timedelta(days=1)
-print(str(datetime.datetime.today()) + " trade data initialization done")
+pl.log("trade data initialization done")
