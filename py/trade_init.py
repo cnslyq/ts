@@ -10,17 +10,17 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 sdate = datetime.date(2016, 12, 1)
-edate = datetime.date.today()
-# edate = datetime.date(2016, 12, 5)
+# edate = datetime.date.today()
+edate = datetime.date(2016, 12, 4)
 pl.log("trade data initialization start...")
 # codes = [item[0] for item in ts.get_area_classified().values]
 codes = session.query("code").from_statement(text("select code from stock_info")).all()
 codes = [item[0].encode('utf8') for item in codes]
 
 for code in codes:
+  pl.log("processs code : " + code)
   df = ts.get_k_data(code, start=str(sdate))
   if df is not None:
-    # print code
     df = df.set_index('code', drop='true')
     df.to_sql('trade_market_history', engine, if_exists='append')
   
