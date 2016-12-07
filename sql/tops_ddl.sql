@@ -10,7 +10,7 @@ create table tops_list(
 	`sell` double,
 	`bratio` double,
 	`sratio` double,
-	`reason` varchar(64),
+	`reason` varchar(128),
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 alter table tops_list add index tops_list_date_idx (`date`);
@@ -76,7 +76,7 @@ create table tops_inst_detail(
 	`name` varchar(16),
 	`bamount` double,
 	`samount` double,
-	`type` varchar(64),
+	`type` varchar(128),
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 );
 alter table tops_inst_detail add index tops_inst_detail_date_idx (`date`);
