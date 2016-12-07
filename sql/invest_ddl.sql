@@ -77,7 +77,7 @@ create table invest_new_stock(
 	`ballot` double,
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 );
-alter table invest_new_stock add index invest_new_stock_date_idx (`date`);
+alter table invest_new_stock add index invest_new_stock_date_idx (`ipo_date`);
 alter table invest_new_stock add index invest_new_stock_code_idx (`code`);
 
 drop table if exists invest_margin_sh_smry;

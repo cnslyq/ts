@@ -25,12 +25,18 @@ def daily(engine, session):
 	Saturday
 	Sunday
 	'''
+	'''
 	ddate = datetime.date.today() - datetime.timedelta(days=7)
-	pl.log("tops_list start...")
-	df = ts.top_list(str(ddate))
-	df = df.set_index('code', drop='true')
-	df.to_sql('tops_list',engine,if_exists='append')
-	pl.log("tops_list done")
+	if not ts.is_holiday(str(ddate)):
+		pl.log("tops_list start...")
+		df = ts.top_list(str(ddate))
+		df = df.set_index('code', drop='true')
+		df.to_sql('tops_list',engine,if_exists='append')
+		pl.log("tops_list done")
+	else:
+		pl.log("%s is a holiday" % str(ddate))
+	'''
+	pass
 
 def weekly(engine, session):
 	tops(engine, 5)

@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import datetime
-import tushare as ts
 import py.pylog as pl
 import sys
 
@@ -21,17 +20,6 @@ today = datetime.date.today()
 engine = create_engine(ENGINE)
 Session = sessionmaker(bind=engine)
 session = Session()
-
-
-if sys.argv[1] == "init":
-	init()
-elif sys.argv[1] == "hist":
-	history()
-elif sys.argv[1] == "daily":
-	daily()
-else:
-	print("wrong function name")
-	sys.exit(1)
 
 def init():
 	pl.log("data initialization start...")
@@ -61,18 +49,17 @@ def history():
 	
 def daily():
 	# daily
-	if not ts.is_holiday(str(today)):
-	# if True:
-		pl.log("daily task start...")
-		for item in DAILY_LIST:
-			pl.log(item + " daily start...")
-			impstr = "import " + item + " as module"
-			exec impstr
-			module.daily(engine, session)
-			pl.log(item + " daily done")
-		pl.log("daily task done")
+	pl.log("daily task start...")
+	for item in DAILY_LIST:
+		pl.log(item + " daily start...")
+		impstr = "import " + item + " as module"
+		exec impstr
+		module.daily(engine, session)
+		pl.log(item + " daily done")
+	pl.log("daily task done")
 	'''
-	# weekly on Tuesday, TBD
+	TBD
+	# weekly on Tuesday
 	if 1 == today.weekday():
 		pl.log("weekly task start...")
 		for item in WEEKLY_LIST:
@@ -83,6 +70,8 @@ def daily():
 			pl.log(item + " weekly done")
 		pl.log("weekly task done")
 	'''
+	'''
+	TBD
 	# monthly on the 1st of each month
 	if 1 == today.day:
 		pl.log("monthly task start...")
@@ -104,3 +93,14 @@ def daily():
 				module.quarterly(engine, session)
 				pl.log(item + " quarterly done")
 			pl.log("quarterly task done")
+	'''
+
+if sys.argv[1] == "init":
+	init()
+elif sys.argv[1] == "hist":
+	history()
+elif sys.argv[1] == "daily":
+	daily()
+else:
+	print("wrong function name")
+	sys.exit(1)

@@ -23,20 +23,23 @@ def history(engine, session, sdate, edate):
 
 def daily(engine, session):
 	today = datetime.date.today()
-	pl.log("trade_index_today start...")
-	df = ts.get_index()
-	df = df.set_index('code', drop='true')
-	df['date'] = today
-	df.to_sql('trade_index_today', engine, if_exists='append')
-	pl.log("trade_index_today done")
+	if not ts.is_holiday(str(today)):
+		pl.log("trade_index_today start...")
+		df = ts.get_index()
+		df = df.set_index('code', drop='true')
+		df['date'] = today
+		df.to_sql('trade_index_today', engine, if_exists='append')
+		pl.log("trade_index_today done")
 
-	pl.log("trade_market_today start...")
-	df = ts.get_today_all()
-	df = df.set_index('code', drop='true')
-	df['date'] = today
-	df.to_sql('trade_market_today', engine, if_exists='append')
-	print
-	pl.log("trade_market_today done")
+		pl.log("trade_market_today start...")
+		df = ts.get_today_all()
+		df = df.set_index('code', drop='true')
+		df['date'] = today
+		df.to_sql('trade_market_today', engine, if_exists='append')
+		print
+		pl.log("trade_market_today done")
+	else:
+		pl.log("today is a holiday")
 
 	pl.log("trade_block start...")
 	codes = pu.get_codes(session)
