@@ -84,12 +84,12 @@ drop table if exists invest_margin_sh_smry;
 create table invest_margin_sh_smry(
 	`id` bigint(20) primary key not null auto_increment,
 	`opDate` date,
-	`rzye` int(16),
-	`rzmre` int(16),
-	`rqyl` int(16),
-	`rqylje` int(16),
-	`rqmcl` int(16),
-	`rzrqjyzl` int(16),
+	`rzye` bigint(16),
+	`rzmre` bigint(16),
+	`rqyl` bigint(16),
+	`rqylje` bigint(16),
+	`rqmcl` bigint(16),
+	`rzrqjyzl` bigint(16),
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 );
 alter table invest_margin_sh_smry add index invest_margin_sh_smry_date_idx (`opDate`);
@@ -100,12 +100,12 @@ create table invest_margin_sh_dtl(
 	`opDate` date,
 	`stockCode` varchar(8),
 	`securityAbbr` varchar(16),
-	`rzye` int(16),
-	`rzmre` int(16),
-	`rzche` int(16),
-	`rqyl` int(16),
-	`rqmcl` int(16),
-	`rqchl` int(16),
+	`rzye` bigint(16),
+	`rzmre` bigint(16),
+	`rzche` bigint(16),
+	`rqyl` bigint(16),
+	`rqmcl` bigint(16),
+	`rqchl` bigint(16),
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 );
 alter table invest_margin_sh_dtl add index invest_margin_sh_dtl_date_idx (`opDate`);
@@ -115,12 +115,12 @@ drop table if exists invest_margin_sz_smry;
 create table invest_margin_sz_smry(
 	`id` bigint(20) primary key not null auto_increment,
 	`opDate` date,
-	`rzye` int(16),
-	`rzmre` int(16),
-	`rqyl` int(16),
-	`rqmcl` int(16),
-	`rqye` int(16),
-	`rzrqye` int(16),
+	`rzye` bigint(16),
+	`rzmre` bigint(16),
+	`rqyl` bigint(16),
+	`rqmcl` bigint(16),
+	`rqye` bigint(16),
+	`rzrqye` bigint(16),
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 );
 alter table invest_margin_sz_smry add index invest_margin_sz_smry_date_idx (`opDate`);
@@ -131,12 +131,12 @@ create table invest_margin_sz_dtl(
 	`opDate` date,
 	`stockCode` varchar(8),
 	`securityAbbr` varchar(16),
-	`rzmre` int(16),
-	`rzye` int(16),
-	`rqmcl` int(16),
-	`rqyl` int(16),
-	`rqye` int(16),
-	`rzrqye` int(16),
+	`rzmre` bigint(16),
+	`rzye` bigint(16),
+	`rqmcl` bigint(16),
+	`rqyl` bigint(16),
+	`rqye` bigint(16),
+	`rzrqye` bigint(16),
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 );
 alter table invest_margin_sz_dtl add index invest_margin_sz_dtl_date_idx (`opDate`);
