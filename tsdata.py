@@ -10,11 +10,11 @@ if len(sys.argv) < 2:
 
 ENGINE = 'mysql://root:123456@127.0.0.1/mysql?charset=utf8'
 INIT_LIST = ['py.stock']
-HISTORY_LIST = ['py.trade', 'py.tops']
-DAILY_LIST = ['py.trade', 'py.tops']
-WEEKLY_LIST = ['py.tops']
-MONTHLY_LIST = ['py.tops']
-QUARTERLY_LIST = []
+HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest']
+DAILY_LIST = ['py.trade', 'py.tops', 'py.invest']
+WEEKLY_LIST = ['py.tops', 'py.invest']
+MONTHLY_LIST = ['py.tops', 'py.invest']
+QUARTERLY_LIST = ['py.invest']
 
 today = datetime.date.today()
 engine = create_engine(ENGINE)
