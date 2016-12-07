@@ -2,13 +2,43 @@ import tushare as ts
 import datetime
 import pylog as pl
 
-def weekly(session, engine):
-	tops(5, engine)
+def history(engine, session, sdate, edate):
+	cdate = sdate
+	pl.log("tops_list start...")
+	while cdate < edate:
+		if not ts.is_holiday(str(cdate)):
+			df = ts.top_list(str(cdate))
+			if df is not None:
+				df = df.set_index('code', drop='true')
+				df.to_sql('tops_list',engine,if_exists='append')
+		cdate += datetime.timedelta(days=1)
+	pl.log("tops_list done")
 
-def monthly(session, engine):
-	tops(30, engine)
+def daily(engine, session):
+	'''
+	curr date	data date
+	Monday
+	Tuesday		last Friday
+	Wednesday
+	Thursday
+	Friday
+	Saturday
+	Sunday
+	'''
+	ddate = datetime.date.today() - datetime.timedelta(days=7)
+	pl.log("tops_list start...")
+	df = ts.top_list(str(ddate))
+	df = df.set_index('code', drop='true')
+	df.to_sql('tops_list',engine,if_exists='append')
+	pl.log("tops_list done")
 
-def tops(freq, engine):
+def weekly(engine, session):
+	tops(engine, 5)
+
+def monthly(engine, session):
+	tops(engine, 30)
+
+def tops(engine, freq):
 	today = datetime.date.today()
 	
 	pl.log("tops_stock start...")

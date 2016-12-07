@@ -3,11 +3,7 @@ import datetime
 import pylog as pl
 import pyutil as pu
 
-def init(engine, session):
-	sdate = datetime.date(2016, 12, 1)
-	# edate = datetime.date.today()
-	edate = datetime.date(2016, 12, 6)
-
+def history(engine, session, sdate, edate):
 	codes = pu.get_codes(session)
 	for code in codes:
 		pl.log("processs code : " + code)
@@ -15,12 +11,9 @@ def init(engine, session):
 		if df is not None:
 			df = df.set_index('code', drop='true')
 			df.to_sql('trade_market_history', engine, if_exists='append')
-		print("history done")
 		cdate = sdate
 		while cdate < edate:
-			print(cdate)
 			if not ts.is_holiday(str(cdate)):
-				print("is not holiday") 
 				df = ts.get_sina_dd(code, cdate, vol=5000)
 				if df is not None:
 					df = df.set_index('code', drop='true')
