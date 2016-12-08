@@ -8,6 +8,7 @@ def get_codes(session):
 	return codes
 
 def is_tddate(session, date):
+	global cal
 	if cal is None:
 		cal = session.query("date", "is_open").from_statement(text("select date, is_open from calendar")).all()
 		cal = {item[0]:item[1] for item in cal}
