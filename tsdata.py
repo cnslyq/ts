@@ -133,12 +133,12 @@ elif sys.argv[1] == "hm":
 	if len(sys.argv) < 4:
 		print("please input year, month ")
 		sys.exit(1)
-	history_m(sys.argv[2], sys.argv[3])
+	history_m(int(sys.argv[2]), int(sys.argv[3]))
 elif sys.argv[1] == "hq":
 	if len(sys.argv) < 4:
 		print("please input year, quarter ")
 		sys.exit(1)
-	history_q(sys.argv[2], sys.argv[3])
+	history_q(int(sys.argv[2]), int(sys.argv[3]))
 elif sys.argv[1] == "cron":
 	today = datetime.date.today()
 	cron(today)
