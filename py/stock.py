@@ -58,3 +58,7 @@ def init(engine, session):
 	df = ts.get_suspended()
 	df.to_sql('stock_pause_list',engine,if_exists='replace')
 	pl.log("stock_pause_list done")
+	
+	pl.log("call update_stock_info start...")
+	session.execute('call update_stock_info')
+	pl.log("call update_stock_info done")
