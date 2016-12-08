@@ -1,18 +1,30 @@
 import tushare as ts
 import datetime
 import pylog as pl
+import pyutil as pu
 
 def history(engine, session, sdate, edate):
-	margin_sh_smry(engine, sdate, edate)
-	margin_sh_dtl(engine, sdate, edate)
-	margin_sz_smry(engine, sdate, edate)
+	margin_sh_smry(engine, str(sdate), str(edate))
+	margin_sh_dtl(engine, str(sdate), str(edate))
+	margin_sz_smry(engine, str(sdate), str(edate))
+	cdate = sdate
+	while cdate <= edate:
+		if pu.is_tddate(engine, cdate):
+			margin_sz_dtl(engine, str(cdate))
+		cdate += datetime.timedelta(days=1)
 	
-	
+	year = sdate.year
+	sm = sdate.month
+	em = edate.month + 1
+	for month in range(sm, em):
+		lifted(engine, year, month)
+	quarter = sdate.month / 3 + 1
+	quarterly(engine, session, year, quarter)
 
-def daily(engine, session):
-	ddate = str(datetime.date.today() - datetime.timedelta(days=1))
-	# if not ts.is_holiday(str(ddate)):
-	if True:
+def daily(engine, session, cdate):
+	ddate = cdate - datetime.timedelta(days=1)
+	if pu.is_tddate(engine, ddate):
+		ddate = str(ddate)
 		margin_sh_smry(engine, ddate, ddate)
 		margin_sh_dtl(engine, ddate, ddate)
 		margin_sz_smry(engine, ddate, ddate)
@@ -20,106 +32,133 @@ def daily(engine, session):
 	else:
 		pl.log("yesterday is a holiday")
 	
-def weekly(engine, session):
+def weekly(engine, session, cdate):
 	today = datetime.date.today()
-	forecast(engine, today.year, (today.month-1) / 3 + 1)
+	forecast(engine, today.year, (today.month - 1) / 3 + 1)
 	
-def monthly(engine, session):
-	dinfo = get_dateinfo()
-	lifted(engine, dinfo[0], dinfo[1])
+def monthly(engine, session, year, month):
+	lifted(engine, year, month)
 	new_stock(engine)
 	
-def quarterly(engine, session):
-	dinfo = get_dateinfo()
-	forecast_history(engine, dinfo[0], dinfo[2])
-	fund_hold(engine, dinfo[0], dinfo[2])
-
-def get_dateinfo():
-	today = datetime.date.today()
-	year = today.year
-	month = today.month - 1
-	if today.month == 1:
-		year -= 1
-		month += 12
-	quarter = month / 3
-	return [year, month, quarter]
+def quarterly(engine, session, year, quarter):
+	forecast_history(engine, year, quarter)
+	fund_hold(engine, year, quarter)
 
 def margin_sh_smry(engine, sdate, edate):
 	pl.log("invest_margin_sh_smry start...")
-	df = ts.sh_margins(sdate, edate)
-	if len(df) > 0:
+	try:
+		df = ts.sh_margins(sdate, edate)
 		df = df.set_index('opDate', drop='true')
 		df.to_sql('invest_margin_sh_smry',engine,if_exists='append')
-	print
-	pl.log("invest_margin_sh_smry done")
+		print
+		pl.log("invest_margin_sh_smry done")
+	except BaseException, e:
+		print
+		print e
+		pl.log("invest_margin_sh_smry error")
 
 def margin_sh_dtl(engine, sdate, edate):
 	pl.log("invest_margin_sh_dtl start...")
-	df = ts.sh_margin_details(sdate, edate)
-	if len(df) > 0:
+	try:
+		df = ts.sh_margin_details(sdate, edate)
 		df = df.set_index('opDate', drop='true')
 		df.to_sql('invest_margin_sh_dtl',engine,if_exists='append')
-	print
-	pl.log("invest_margin_sh_dtl done")
-
+		pl.log("invest_margin_sh_dtl done")
+	except BaseException, e:
+		print
+		print e
+		pl.log("invest_margin_sh_dtl error")
+		
 def margin_sz_smry(engine, sdate, edate):
 	pl.log("invest_margin_sz_smry start...")
-	df = ts.sz_margins(sdate, edate)
-	if len(df) > 0:
+	try:
+		df = ts.sz_margins(sdate, edate)
 		df = df.set_index('opDate', drop='true')
 		df.to_sql('invest_margin_sz_smry',engine,if_exists='append')
-	print
-	pl.log("invest_margin_sz_smry done")
-
+		pl.log("invest_margin_sz_smry done")
+	except BaseException, e:
+		print
+		print e
+		pl.log("invest_margin_sz_smry error")
+		
 def margin_sz_dtl(engine, ddate):
 	pl.log("invest_margin_sz_dtl start...")
-	df = ts.sz_margin_details(ddate)
-	if len(df) > 0:
+	try:
+		df = ts.sz_margin_details(ddate)
 		df = df.set_index('opDate', drop='true')
 		df.to_sql('invest_margin_sz_dtl',engine,if_exists='append')
-	print
-	pl.log("invest_margin_sz_dtl done")
-
+		print
+		pl.log("invest_margin_sz_dtl done")
+	except BaseException, e:
+		print
+		print e
+		pl.log("invest_margin_sz_dtl error")
+		
 def lifted(engine, year, month):
 	pl.log("invest_lifted start...")
-	df = ts.xsg_data(year, month)
-	df = df.set_index('code', drop='true')
-	df.to_sql('invest_lifted',engine,if_exists='append')
-	pl.log("invest_lifted done")
-
+	try:
+		df = ts.xsg_data(year, month)
+		df = df.set_index('code', drop='true')
+		df.to_sql('invest_lifted',engine,if_exists='append')
+		pl.log("invest_lifted done")
+	except BaseException, e:
+		print
+		print e
+		pl.log("invest_lifted error")
+		
 def new_stock(engine):
 	pl.log("invest_new_stock start...")
-	df = ts.new_stocks()
-	df['date'] = today
-	df = df.set_index('code', drop='true')
-	df.to_sql('invest_new_stock',engine,if_exists='append')
-	print
-	pl.log("invest_new_stock done")
-
+	try:
+		df = ts.new_stocks()
+		df['date'] = datetime.date.today()
+		df = df.set_index('code', drop='true')
+		df.to_sql('invest_new_stock',engine,if_exists='append')
+		print
+		pl.log("invest_new_stock done")
+	except BaseException, e:
+		print
+		print e
+		pl.log("invest_new_stock error")
+		
 def forecast(engine, year, quarter):
 	pl.log("invest_forecast start...")
-	df = ts.forecast_data(year, quarter)
-	df['year'] = year
-	df['quarter'] = quarter
-	df = df.set_index('code', drop='true')
-	df.to_sql('invest_forecast',engine,if_exists='replace')
-	print
-	pl.log("invest_forecast done")
-
+	try:
+		df = ts.forecast_data(year, quarter)
+		df['year'] = year
+		df['quarter'] = quarter
+		df = df.set_index('code', drop='true')
+		df.to_sql('invest_forecast',engine,if_exists='replace')
+		print
+		pl.log("invest_forecast done")
+	except BaseException, e:
+		print
+		print e
+		pl.log("invest_forecast error")
+		
 def forecast_history(engine, year, quarter):
 	pl.log("invest_forecast_history start...")
-	df = ts.forecast_data(year, quarter)
-	df['year'] = year
-	df['quarter'] = quarter
-	df = df.set_index('code', drop='true')
-	df.to_sql('invest_forecast_history',engine,if_exists='append')
-	print
-	pl.log("invest_forecast_history done")
-
+	try:
+		df = ts.forecast_data(year, quarter)
+		df['year'] = year
+		df['quarter'] = quarter
+		df = df.set_index('code', drop='true')
+		df.to_sql('invest_forecast_history',engine,if_exists='append')
+		print
+		pl.log("invest_forecast_history done")
+	except BaseException, e:
+		print
+		print e
+		pl.log("invest_forecast_history error")
+		
 def fund_hold(engine, year, quarter):
 	pl.log("invest_fund_hold start...")
-	df = ts.fund_holdings(year, quarter)
-	df = df.set_index('code', drop='true')
-	df.to_sql('invest_fund_hold',engine,if_exists='append')
-	print
-	pl.log("invest_fund_hold done")
+	try:
+		df = ts.fund_holdings(year, quarter)
+		df = df.set_index('code', drop='true')
+		df.to_sql('invest_fund_hold',engine,if_exists='append')
+		print
+		pl.log("invest_fund_hold done")
+	except BaseException, e:
+		print
+		print e
+		pl.log("invest_fund_hold error")

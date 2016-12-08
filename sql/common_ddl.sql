@@ -16,3 +16,8 @@ create table dict(
 	`value` int(8)
 ) ENGINE=InnoDB;
 
+drop table if exists calendar;
+create table calendar(
+	`date` date primary key not null,
+	`is_open` int(1)
+) ENGINE=InnoDB;
