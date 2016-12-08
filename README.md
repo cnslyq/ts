@@ -9,7 +9,7 @@ alias tsdata='python /home/ts/tsdata.py'
 ####a.cron task
 tsdata cron
 ####b.fetch history data
-date range : tsdata hist startdate enddate
-month data : tsdata hm year month
-quarter datat : tsdata hq year quarter
+date range : tsdata hist startdate enddate  
+month data : tsdata hm year month  
+quarter datat : tsdata hq year quarter  
 
