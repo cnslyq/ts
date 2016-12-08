@@ -7,4 +7,6 @@ source /home/ts/sql/tops_ddl.sql
 
 source /home/ts/sql/common_dml.sql
 
+source /home/ts/sql/stock_proc.sql
+
 commit;
