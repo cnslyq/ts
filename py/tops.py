@@ -7,7 +7,7 @@ def history(engine, session, sdate, edate):
 	cdate = sdate
 	pl.log("tops_list start...")
 	while cdate <= edate:
-		if pu.is_tddate(engine, cdate):
+		if pu.is_tddate(session, cdate):
 			try:
 				df = ts.top_list(str(cdate))
 				if df is not None:
@@ -19,20 +19,20 @@ def history(engine, session, sdate, edate):
 		cdate += datetime.timedelta(days=1)
 	pl.log("tops_list done")
 
-def daily(engine, session):
+def daily(engine, session, cdate):
 	'''
 	curr date	data date
 	Monday
 	Tuesday		last Friday
-	Wednesday
+	Wednesday	last Friday
 	Thursday
 	Friday
 	Saturday
 	Sunday
 	'''
 	'''
-	ddate = datetime.date.today() - datetime.timedelta(days=7)
-	if pu.is_tddate(engine, ddate):
+	ddate = cdate - datetime.timedelta(days=7)
+	if pu.is_tddate(session, ddate):
 		pl.log("tops_list start...")
 		df = ts.top_list(str(ddate))
 		df = df.set_index('code', drop='true')
@@ -95,6 +95,7 @@ def tops(engine, freq):
 		pl.log("tops_inst_seat error")
 	
 	# TBD
+	'''
 	if freq == 5:
 		pl.log("tops_inst_detail start...")
 		try:
@@ -107,3 +108,4 @@ def tops(engine, freq):
 			print
 			print e
 			pl.log("tops_inst_detail error")
+	'''

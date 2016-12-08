@@ -8,7 +8,7 @@ def history(engine, session, sdate, edate):
 	for code in codes:
 		pl.log("processs code : " + code)
 		try:
-			df = ts.get_k_data(code, start=str(sdate))
+			df = ts.get_k_data(code, start=str(sdate), end=str(edate))
 			if df is not None:
 				df = df.set_index('code', drop='true')
 				df.to_sql('trade_market_history', engine, if_exists='append')
@@ -18,9 +18,9 @@ def history(engine, session, sdate, edate):
 		
 		cdate = sdate
 		while cdate <= edate:
-			if pu.is_tddate(engine, cdate):
+			if pu.is_tddate(session, cdate):
 				try:
-					df = ts.get_sina_dd(code, cdate, vol=5000)
+					df = ts.get_sina_dd(code, cdate, vol=10000)
 					if df is not None:
 						df = df.set_index('code', drop='true')
 						df['date'] = cdate
@@ -31,7 +31,7 @@ def history(engine, session, sdate, edate):
 			cdate += datetime.timedelta(days=1)
 
 def daily(engine, session, cdate):
-	if pu.is_tddate(engine, cdate):
+	if pu.is_tddate(session, cdate):
 		pl.log("trade_index_today start...")
 		try:
 			df = ts.get_index()
@@ -60,7 +60,7 @@ def daily(engine, session, cdate):
 		codes = pu.get_codes(session)
 		for code in codes:
 			try:
-				df = ts.get_sina_dd(code, cdate, vol=5000)
+				df = ts.get_sina_dd(code, cdate, vol=10000)
 				if df is not None:
 					df = df.set_index('code', drop='true')
 					df['date'] = cdate

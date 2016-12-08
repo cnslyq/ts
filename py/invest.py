@@ -9,21 +9,19 @@ def history(engine, session, sdate, edate):
 	margin_sz_smry(engine, str(sdate), str(edate))
 	cdate = sdate
 	while cdate <= edate:
-		if pu.is_tddate(engine, cdate):
+		if pu.is_tddate(session, cdate):
 			margin_sz_dtl(engine, str(cdate))
 		cdate += datetime.timedelta(days=1)
 	
-	year = sdate.year
-	sm = sdate.month
-	em = edate.month + 1
-	for month in range(sm, em):
-		lifted(engine, year, month)
-	quarter = sdate.month / 3 + 1
+def history_m(engine, session, year, month):
+	lifted(engine, year, month)
+
+def history_q(engine, session, year, quarter):
 	quarterly(engine, session, year, quarter)
 
 def daily(engine, session, cdate):
 	ddate = cdate - datetime.timedelta(days=1)
-	if pu.is_tddate(engine, ddate):
+	if pu.is_tddate(session, ddate):
 		ddate = str(ddate)
 		margin_sh_smry(engine, ddate, ddate)
 		margin_sh_dtl(engine, ddate, ddate)
