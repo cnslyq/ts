@@ -93,6 +93,8 @@ def margin_sz_dtl(engine, ddate):
 		pl.log("invest_margin_sz_dtl error")
 		
 def lifted(engine, year, month):
+	pu.to_sql(engine, 'invest_lifted', plist=[year, month])
+	'''
 	pl.log("invest_lifted start...")
 	try:
 		df = ts.xsg_data(year, month)
@@ -103,6 +105,7 @@ def lifted(engine, year, month):
 		print
 		print e
 		pl.log("invest_lifted error")
+	'''
 		
 def new_stock(engine):
 	pl.log("invest_new_stock start...")
