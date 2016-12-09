@@ -8,7 +8,7 @@ create table invest_forecast(
 	`type` varchar(8),
 	`report_date` date,
 	`pre_eps` double,
-	`range` varchar(16),
+	`range` varchar(32),
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 alter table invest_forecast add index invest_forecast_date_idx (`year`, `quarter`);
@@ -24,7 +24,7 @@ create table invest_forecast_history(
 	`type` varchar(8),
 	`report_date` date,
 	`pre_eps` double,
-	`range` varchar(16),
+	`range` varchar(32),
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 alter table invest_forecast_history add index invest_forecast_history_date_idx (`year`, `quarter`);
