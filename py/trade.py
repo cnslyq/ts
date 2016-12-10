@@ -5,8 +5,9 @@ import pyutil as pu
 
 def history(engine, session, sdate, edate):
 	codes = pu.get_codes(session)
+	cnt = 0
 	for code in codes:
-		pl.log("processs code : " + code)
+		# pl.log("processs code : " + code)
 		try:
 			df = ts.get_k_data(code, start=str(sdate), end=str(edate))
 			if df is not None:
@@ -14,7 +15,7 @@ def history(engine, session, sdate, edate):
 				df.to_sql('trade_market_history', engine, if_exists='append')
 		except BaseException, e:
 			print e
-			pl.log("trade_market_history error")
+			pl.log("trade_market_history error for %s" % code)
 		
 		cdate = sdate
 		while cdate <= edate:
@@ -27,8 +28,11 @@ def history(engine, session, sdate, edate):
 						df.to_sql('trade_block', engine, if_exists='append')
 				except BaseException, e:
 					print e
-					pl.log("trade_block error on " + str(cdate))
+					pl.log("trade_block error for %s on %s" % (code, str(cdate)))
 			cdate += datetime.timedelta(days=1)
+		cnt += 1
+		if cnt % 100 == 0:
+			pl.log("process %i codes" % cnt)
 
 def daily(engine, session, cdate):
 	if pu.is_tddate(session, cdate):

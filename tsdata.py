@@ -24,13 +24,14 @@ QUARTERLY_LIST = ['py.invest']
 HISTORY_M_LIST = ['py.invest']
 HISTORY_Q_LIST = ['py.invest']
 
-ENGINE = 'mysql://root:123456@127.0.0.1/mysql?charset=utf8'
+ENGINE = 'mysql://root:123456@127.0.0.1/test?charset=utf8'
 engine = create_engine(ENGINE)
 Session = sessionmaker(bind=engine)
 session = Session()
 
 names = locals()
 def call(inp, *params):
+	st = datetime.datetime.today()
 	pl.log(inp + " data start...")
 	list = names['%s_LIST' % inp.upper()]
 	for item in list:
@@ -44,7 +45,8 @@ def call(inp, *params):
 		estr += ")"
 		exec estr
 		pl.log(item + " done")
-	pl.log(inp + " data done")
+	et = datetime.datetime.today()
+	pl.log(inp + " data done cost time : " + str(et - st))
 
 def init():
 	call('init')

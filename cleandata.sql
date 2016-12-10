@@ -1,4 +1,4 @@
-use tushare;
+use test;
 
 truncate trade_index_today;
 truncate trade_market_today;

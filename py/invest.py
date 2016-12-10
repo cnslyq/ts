@@ -10,7 +10,7 @@ def history(engine, session, sdate, edate):
 	cdate = sdate
 	while cdate <= edate:
 		if pu.is_tddate(session, cdate):
-			margin_sz_dtl(engine, str(cdate))
+			margin_sz_dtl(engine, str(cdate), log=False)
 		cdate += datetime.timedelta(days=1)
 	
 def history_m(engine, session, year, month):
@@ -73,28 +73,30 @@ def margin_sz_smry(engine, sdate, edate):
 		df = ts.sz_margins(sdate, edate)
 		df = df.set_index('opDate', drop='true')
 		df.to_sql('invest_margin_sz_smry',engine,if_exists='append')
+		print
 		pl.log("invest_margin_sz_smry done")
 	except BaseException, e:
 		print
 		print e
 		pl.log("invest_margin_sz_smry error")
 		
-def margin_sz_dtl(engine, ddate):
-	pl.log("invest_margin_sz_dtl start...")
+def margin_sz_dtl(engine, ddate, log=True):
+	if(log):
+		pl.log("invest_margin_sz_dtl start...")
 	try:
 		df = ts.sz_margin_details(ddate)
 		df = df.set_index('opDate', drop='true')
 		df.to_sql('invest_margin_sz_dtl',engine,if_exists='append')
-		print
-		pl.log("invest_margin_sz_dtl done")
+		if(log):
+			print
+			pl.log("invest_margin_sz_dtl done")
 	except BaseException, e:
 		print
 		print e
 		pl.log("invest_margin_sz_dtl error")
 		
 def lifted(engine, year, month):
-	pu.to_sql(engine, 'invest_lifted', plist=[year, month])
-	'''
+	# pu.to_sql(engine, 'invest_lifted', plist=[year, month])
 	pl.log("invest_lifted start...")
 	try:
 		df = ts.xsg_data(year, month)
@@ -105,7 +107,6 @@ def lifted(engine, year, month):
 		print
 		print e
 		pl.log("invest_lifted error")
-	'''
 		
 def new_stock(engine):
 	pl.log("invest_new_stock start...")
