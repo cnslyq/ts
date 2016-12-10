@@ -47,7 +47,7 @@ drop table if exists invest_fund_hold;
 create table invest_fund_hold(
 	`id` bigint(20) primary key not null auto_increment,
 	`code` varchar(8),
-	`name` varchar(16),
+	`name` varchar(32),
 	`date` date,
 	`nums` int(4),
 	`nlast` int(4),

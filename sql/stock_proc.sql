@@ -1,5 +1,3 @@
-USE mysql;
-
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS update_stock_info;
