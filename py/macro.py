@@ -3,9 +3,6 @@ import pylog as pl
 from sqlalchemy import create_engine
 
 def init(engine, session):
-	ENGINE = 'mysql://root:123456@127.0.0.1/test?charset=utf8'
-	engine = create_engine(ENGINE)
-	
 	tbl = "macro_deposit"
 	pl.log(tbl + " start...")
 	df = ts.get_deposit_rate()
