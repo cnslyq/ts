@@ -77,7 +77,7 @@ def cron(cdate = datetime.date.today()):
 	call('daily', cdate)
 	
 	# process last week's data every Tuesday(?)
-	if 1 == cdate.weekday():
+	if 0 == cdate.weekday():
 		call('weekly', cdate - datetime.timedelta(days=7))
 	
 	# process last month's data on the 1st of each month
