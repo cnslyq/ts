@@ -19,32 +19,12 @@ def history(engine, session, sdate, edate):
 		cdate += datetime.timedelta(days=1)
 	pl.log("tops_list done")
 
-def daily(engine, session, cdate):
-	'''
-	curr date	data date
-	Monday
-	Tuesday		last Friday
-	Wednesday	last Friday
-	Thursday
-	Friday
-	Saturday
-	Sunday
-	'''
-	'''
-	ddate = cdate - datetime.timedelta(days=7)
-	if pu.is_tddate(session, ddate):
-		pl.log("tops_list start...")
-		df = ts.top_list(str(ddate))
-		df = df.set_index('code', drop='true')
-		df.to_sql('tops_list',engine,if_exists='append')
-		pl.log("tops_list done")
-	else:
-		pl.log("%s is a holiday" % str(ddate))
-	'''
-	pass
-
 def weekly(engine, session, cdate):
-	tops(engine, 5)
+	# TBD need to confirm the execution date
+	# tops(engine, 5)
+	sdate = cdate
+	edate = cdate + datetime.timedelta(days=4)
+	history(engine, session, sdate, edate)
 
 def monthly(engine, session, year, month):
 	tops(engine, 30)
@@ -95,6 +75,7 @@ def tops(engine, freq):
 		pl.log("tops_inst_seat error")
 	
 	# TBD
+	# no data, should be a bug
 	'''
 	if freq == 5:
 		pl.log("tops_inst_detail start...")

@@ -3,6 +3,7 @@ import tushare as ts
 import pylog as pl
 
 cal = None
+'''
 tfmap = {'trade_market_history':'get_k_data',
 		'trade_market_today':'get_today_all',
 		'trade_index_today':'get_index',
@@ -33,7 +34,7 @@ tfmap = {'trade_market_history':'get_k_data',
 		'tops_broker':'broker_tops',
 		'tops_inst_seat':'inst_tops',
 		'tops_inst_detail':'inst_detail'}
-
+'''
 def get_codes(session, vip=False):
 	sql = "select code from stock_info"
 	if(vip):
@@ -58,7 +59,7 @@ def get_ldate(date):
 		ldate["month"] += 12
 	ldate["quarter"] = ldate["month"] / 3
 	return ldate
-
+'''
 def to_sql(engine, table, idx='code', exist='append', plist=[], pdict={}, adata={}, log=True, errmsg=''):
 	if(log):
 		pl.log(table + " start...")
@@ -71,7 +72,11 @@ def to_sql(engine, table, idx='code', exist='append', plist=[], pdict={}, adata=
 			estr += "%s=pdict[%i], " % (pdict[i], i)
 		estr = estr[:-1]
 		estr += ")"
-		exec estr
+		c = compile(estr,'','exec')
+		exec c
+		if len(df) == 0:
+			pl.log(table + " has no data " + errmsg)
+			return
 		for key in adata:
 			df[key] = adata[key]
 		df = df.set_index(idx, drop='true')
@@ -82,3 +87,4 @@ def to_sql(engine, table, idx='code', exist='append', plist=[], pdict={}, adata=
 	except BaseException, e:
 		print e
 		pl.log(table + " error " + errmsg)
+'''

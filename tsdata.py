@@ -17,7 +17,7 @@ import tsdata as td
 INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq']
 INIT_LIST = ['py.stock']
 HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest']
-DAILY_LIST = ['py.trade', 'py.tops', 'py.invest']
+DAILY_LIST = ['py.trade', 'py.invest']
 WEEKLY_LIST = ['py.tops', 'py.invest']
 MONTHLY_LIST = ['py.tops', 'py.invest']
 QUARTERLY_LIST = ['py.invest']

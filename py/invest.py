@@ -5,7 +5,8 @@ import pyutil as pu
 
 def history(engine, session, sdate, edate):
 	margin_sh_smry(engine, str(sdate), str(edate))
-	margin_sh_dtl(engine, str(sdate), str(edate))
+	# no data, should be a bug
+	# margin_sh_dtl(engine, str(sdate), str(edate))
 	margin_sz_smry(engine, str(sdate), str(edate))
 	cdate = sdate
 	while cdate <= edate:
@@ -24,7 +25,8 @@ def daily(engine, session, cdate):
 	if pu.is_tddate(session, ddate):
 		ddate = str(ddate)
 		margin_sh_smry(engine, ddate, ddate)
-		margin_sh_dtl(engine, ddate, ddate)
+		# no data, should be a bug
+		# margin_sh_dtl(engine, ddate, ddate)
 		margin_sz_smry(engine, ddate, ddate)
 		margin_sz_dtl(engine, ddate)
 	else:
