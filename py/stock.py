@@ -62,3 +62,6 @@ def init(engine, session):
 	pl.log("call update_stock_info start...")
 	session.execute('call update_stock_info')
 	pl.log("call update_stock_info done")
+
+def monthly(engine, session, year, month):
+	init(engine, session)

@@ -50,14 +50,14 @@ def is_tddate(session, date):
 		cal = {item[0]:item[1] for item in cal}
 	return cal[date]
 
-def get_ldate(date):
+def get_ldate(date, diff):
 	ldate = {}
 	ldate["year"] = date.year
-	ldate["month"] = date.month - 1
-	if date.month == 1:
+	ldate["month"] = date.month - diff
+	if ldate["month"] <= 0:
 		ldate["year"] -= 1
 		ldate["month"] += 12
-	ldate["quarter"] = ldate["month"] / 3
+	ldate["quarter"] = ldate["month"] / 3 + 1
 	return ldate
 '''
 def to_sql(engine, table, idx='code', exist='append', plist=[], pdict={}, adata={}, log=True, errmsg=''):

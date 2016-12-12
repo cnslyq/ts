@@ -15,14 +15,14 @@ import tsdata as td
 	hq   ->  history_q
 '''
 INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq']
-INIT_LIST = ['py.stock']
+INIT_LIST = ['py.stock', 'py.macro']
 HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest']
 DAILY_LIST = ['py.trade', 'py.invest']
 WEEKLY_LIST = ['py.tops', 'py.invest']
-MONTHLY_LIST = ['py.tops', 'py.invest']
-QUARTERLY_LIST = ['py.invest']
+MONTHLY_LIST = ['py.stock', 'py.macro', 'py.tops', 'py.invest', 'py.basic']
+QUARTERLY_LIST = ['py.invest', 'py.basic']
 HISTORY_M_LIST = ['py.invest']
-HISTORY_Q_LIST = ['py.invest']
+HISTORY_Q_LIST = ['py.invest', 'py.basic']
 
 ENGINE = 'mysql://root:123456@127.0.0.1/test?charset=utf8'
 engine = create_engine(ENGINE)
@@ -33,17 +33,18 @@ names = locals()
 def call(inp, *params):
 	st = datetime.datetime.today()
 	pl.log(inp + " data start...")
+	estr = "func(engine, session"
+	for i in range(len(params)):
+		estr += ", params[%i]" % i
+	estr += ")"
+	c = compile(estr,'','exec')
 	list = names['%s_LIST' % inp.upper()]
 	for item in list:
 		pl.log(item + " start...")
 		obj = __import__(item, fromlist=True)
 		func = getattr(obj, inp)
 		# func(engine, session)
-		estr = "func(engine, session"
-		for i in range(len(params)):
-			estr += ", params[%i]" % i
-		estr += ")"
-		exec estr
+		exec c
 		pl.log(item + " done")
 	et = datetime.datetime.today()
 	pl.log(inp + " data done cost time : " + str(et - st))
@@ -81,12 +82,12 @@ def cron(cdate = datetime.date.today()):
 	
 	# process last month's data on the 1st of each month
 	if 1 == cdate.day:
-		ldate = pu.get_ldate(cdate)
+		ldate = pu.get_ldate(cdate, -1)
 		call('monthly', ldate["year"], ldate["month"])
 	
-	# process last quarter's data on the 2nd of Janurary, April, July and October
-	if 2 == cdate.day and cdate.month in (1, 4, 7, 10):
-		ldate = pu.get_ldate(cdate)
+	# process last quarter's data on the 2nd of March, June, September and December
+	if 2 == cdate.day and cdate.month in (3, 6, 9, 12):
+		ldate = pu.get_ldate(cdate, -5)
 		call('quarterly', ldate["year"], ldate["quarter"])
 
 if __name__ == "__main__":

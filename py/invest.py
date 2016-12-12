@@ -21,7 +21,7 @@ def history_q(engine, session, year, quarter):
 	quarterly(engine, session, year, quarter)
 
 def daily(engine, session, cdate):
-	ddate = cdate - datetime.timedelta(days=2)
+	ddate = cdate - datetime.timedelta(days=1)
 	if pu.is_tddate(session, ddate):
 		ddate = str(ddate)
 		margin_sh_smry(engine, ddate, ddate)
