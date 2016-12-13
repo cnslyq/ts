@@ -3,6 +3,39 @@ import tushare as ts
 import pylog as pl
 
 cal = None
+def get_stock_codes(session, vip=False):
+	sql = "select code from stock_info"
+	if(vip):
+		sql += " where is_hs300 = 1 or is_sz50 = 1 or is_zz500 = 1"
+	codes = session.query("code").from_statement(text(sql)).all()
+	codes = [item[0].encode('utf8') for item in codes]
+	return codes
+
+def get_fund_codes(session):
+	sql = "select symbol from fund_info"
+	codes = session.query("symbol").from_statement(text(sql)).all()
+	codes = [item[0].encode('utf8') for item in codes]
+	return codes
+
+def is_tddate(session, date):
+	global cal
+	if cal is None:
+		cal = session.query("date", "is_open").from_statement(text("select date, is_open from calendar")).all()
+		cal = {item[0]:item[1] for item in cal}
+	return cal[date]
+
+def get_ldate(date, diff):
+	ldate = {}
+	ldate["year"] = date.year
+	ldate["month"] = date.month - diff
+	if ldate["month"] <= 0:
+		ldate["year"] -= 1
+		ldate["month"] += 12
+	ldate["quarter"] = ldate["month"] / 3 + 1
+	return ldate
+	
+
+
 '''
 tfmap = {'trade_market_history':'get_k_data',
 		'trade_market_today':'get_today_all',
@@ -34,32 +67,7 @@ tfmap = {'trade_market_history':'get_k_data',
 		'tops_broker':'broker_tops',
 		'tops_inst_seat':'inst_tops',
 		'tops_inst_detail':'inst_detail'}
-'''
-def get_codes(session, vip=False):
-	sql = "select code from stock_info"
-	if(vip):
-		sql += " where is_hs300 = 1 or is_sz50 = 1 or is_zz500 = 1"
-	codes = session.query("code").from_statement(text(sql)).all()
-	codes = [item[0].encode('utf8') for item in codes]
-	return codes
 
-def is_tddate(session, date):
-	global cal
-	if cal is None:
-		cal = session.query("date", "is_open").from_statement(text("select date, is_open from calendar")).all()
-		cal = {item[0]:item[1] for item in cal}
-	return cal[date]
-
-def get_ldate(date, diff):
-	ldate = {}
-	ldate["year"] = date.year
-	ldate["month"] = date.month - diff
-	if ldate["month"] <= 0:
-		ldate["year"] -= 1
-		ldate["month"] += 12
-	ldate["quarter"] = ldate["month"] / 3 + 1
-	return ldate
-'''
 def to_sql(engine, table, idx='code', exist='append', plist=[], pdict={}, adata={}, log=True, errmsg=''):
 	if(log):
 		pl.log(table + " start...")

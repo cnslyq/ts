@@ -1,6 +1,6 @@
 drop table if exists basic_stock;
 create table basic_stock(
-	`id` int(6) primary key not null,
+	`id` int(6) primary key not null auto_increment,
 	`code` varchar(8),
 	`name` varchar(16),
 	`industry` varchar(16),

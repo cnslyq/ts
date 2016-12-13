@@ -15,11 +15,12 @@ import tsdata as td
 	hq   ->  history_q
 '''
 INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq']
-INIT_LIST = ['py.stock', 'py.macro']
-HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest']
-DAILY_LIST = ['py.trade', 'py.invest']
+# INIT_LIST = ['py.stock', 'py.macro', 'py.fund']
+INIT_LIST = ['py.fund']
+HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest', 'py.fund']
+DAILY_LIST = ['py.trade', 'py.invest', 'py.fund']
 WEEKLY_LIST = ['py.tops', 'py.invest']
-MONTHLY_LIST = ['py.stock', 'py.macro', 'py.tops', 'py.invest', 'py.basic']
+MONTHLY_LIST = ['py.stock', 'py.macro', 'py.tops', 'py.invest', 'py.basic', 'py.fund']
 QUARTERLY_LIST = ['py.invest', 'py.basic']
 HISTORY_M_LIST = ['py.invest']
 HISTORY_Q_LIST = ['py.invest', 'py.basic']
@@ -76,7 +77,7 @@ def cron(cdate = datetime.date.today()):
 	# process today's data
 	call('daily', cdate)
 	
-	# process last week's data every Tuesday(?)
+	# process last week's data every Monday(?)
 	if 0 == cdate.weekday():
 		call('weekly', cdate - datetime.timedelta(days=7))
 	

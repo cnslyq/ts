@@ -4,7 +4,7 @@ import pylog as pl
 import pyutil as pu
 
 def history(engine, session, sdate, edate):
-	codes = pu.get_codes(session)
+	codes = pu.get_stock_codes(session)
 	cnt = 0
 	for code in codes:
 		# pl.log("processs code : " + code)
@@ -61,7 +61,7 @@ def daily(engine, session, cdate):
 			pl.log("trade_market_today error")
 		
 		pl.log("trade_block start...")
-		codes = pu.get_codes(session)
+		codes = pu.get_stock_codes(session)
 		for code in codes:
 			try:
 				df = ts.get_sina_dd(code, cdate, vol=10000)

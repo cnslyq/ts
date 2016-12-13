@@ -5,25 +5,7 @@ DROP PROCEDURE IF EXISTS update_stock_info;
 CREATE PROCEDURE update_stock_info()
 BEGIN
 
-declare done int default 0;
-declare v_code varchar(8);
-declare v_name varchar(16);
-declare v_count int default 0;
-
-declare cursor_name cursor for select a.code, a.name from stock_area a where not exists(select 1 from stock_info b where a.code = b.code);
-declare continue handler for SQLSTATE '02000' set done = 1;  
-
-open cursor_name;
-fetch cursor_name into v_code, v_name;
-
-while done <> 1 do
-  select count(1) into v_count from stock_info where code = v_code;
-  if v_count = 0 then
-    insert into stock_info(code, name) values (v_code, v_name);
-  end if;
-  fetch cursor_name into v_code, v_name;
-end while;
-close cursor_name;
+insert into stock_info(code, name) select a.code, a.name from stock_area a where not exists(select 1 from stock_info b where a.code = b.code);
 
 update stock_info t1, (
  select a.code as code,
