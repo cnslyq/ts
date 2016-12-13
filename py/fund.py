@@ -2,26 +2,32 @@ import tushare as ts
 import datetime
 import pylog as pl
 import pyutil as pu
+import gc
 
 def init(engine, session):
 	# get latest codes
 	pl.log("get latest codes start...")
 	codes = []
-	df = ts.get_nav_open()
+	close = ts.get_nav_close().symbol.values
 	print
-	codes += [str(item) for item in df.symbol.values]
-	df = ts.get_nav_close()
+	codes += [str(item) for item in close]
+	grading = ts.get_nav_grading().symbol.values
 	print
-	codes += [str(item) for item in df.symbol.values]
-	df = ts.get_nav_grading()
+	codes += [str(item) for item in grading]
+	open = ts.get_nav_open().symbol.values
 	print
-	codes += [str(item) for item in df.symbol.values]
+	codes += [str(item) for item in open]
+	del close
+	del grading
+	del open
+	gc.collect()
 	pl.log("get latest codes done")
 	# insert latest info into fund_temp_info
+	# rmcodes = ['37001B', '16162A', '16300L']
 	temp_info(engine, codes)
 	# update fund_temp_info to fund_info
 	pl.log("call update_fund_info start...")
-	# session.execute('call update_fund_info')
+	session.execute('call update_fund_info')
 	pl.log("call update_fund_info done")
 	
 def daily(engine, session, cdate):
@@ -47,21 +53,35 @@ def temp_info(engine, codes):
 	temp = []
 	pl.log(tbl + " start...")
 	cnt = 0
-	df = ts.get_fund_info(codes[0]).reset_index()
-	df.to_sql(tbl,engine,if_exists='replace')
-	for code in codes[1:]:
+	first = True
+	for code in codes:
 		try:
-			df = ts.get_fund_info(code).reset_index()
-			df.to_sql(tbl,engine,if_exists='append')
+			if cnt % 500 == 0:
+				df = ts.get_fund_info(code).reset_index()
+			else:
+				newdf = ts.get_fund_info(code).reset_index()
+				df = df.append(newdf, ignore_index=True)
+				del newdf
+				gc.collect()
 		except BaseException, e:
 			print e
 			pl.log(tbl + " error for " + code)
-			if e == 'timed out':
+			if 'timed out' in str(e):
 				temp.append(code)
-				print temp
 		cnt += 1
-		if cnt % 100 == 0:
+		if cnt % 500 == 0:
 			pl.log("process %i codes" % cnt)
+			if(first):
+				df.to_sql(tbl,engine,if_exists='replace')
+				first = False
+			else:
+				df.to_sql(tbl,engine,if_exists='append')
+			del df
+			gc.collect()
+	if(first):
+		df.to_sql(tbl,engine,if_exists='replace')
+	else:
+		df.to_sql(tbl,engine,if_exists='append')
 	pl.log(tbl + " done")
 	if len(temp) != 0:
 		temp_info(engine, temp)
