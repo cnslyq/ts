@@ -44,32 +44,27 @@ def history(engine, session, sdate, edate):
 
 def temp_info(engine, codes):
 	tbl = "fund_temp_info"
+	temp = []
 	pl.log(tbl + " start...")
 	cnt = 0
-	first = True
-	for code in codes:
+	df = ts.get_fund_info(codes[0]).reset_index()
+	df.to_sql(tbl,engine,if_exists='replace')
+	for code in codes[1:]:
 		try:
-			if cnt % 100 == 0:
-				df = ts.get_fund_info(code).reset_index()
-			else:
-				newdf = ts.get_fund_info(code).reset_index()
-				df = df.append(newdf, ignore_index=True)
+			df = ts.get_fund_info(code).reset_index()
+			df.to_sql(tbl,engine,if_exists='append')
 		except BaseException, e:
 			print e
 			pl.log(tbl + " error for " + code)
+			if e == 'timed out':
+				temp.append(code)
+				print temp
 		cnt += 1
 		if cnt % 100 == 0:
 			pl.log("process %i codes" % cnt)
-			if(first):
-				df.to_sql(tbl,engine,if_exists='replace')
-				first = False
-			else:
-				df.to_sql(tbl,engine,if_exists='append')
-	if(first):
-		df.to_sql(tbl,engine,if_exists='replace')
-	else:
-		df.to_sql(tbl,engine,if_exists='append')
 	pl.log(tbl + " done")
+	if len(temp) != 0:
+		temp_info(engine, temp)
 
 def nav_open(engine, cdate):
 	tbl = "fund_nav_open"
