@@ -6,7 +6,7 @@ def daily(engine, session, cdate):
 	pl.log(tbl + " start...")
 	try:
 		df = ts.get_intlfuture()
-		df['date'] = code
+		df['date'] = cdate
 		df.to_sql(tbl,engine,if_exists='append')
 		pl.log(tbl + " done")
 	except BaseException, e:
