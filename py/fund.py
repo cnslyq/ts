@@ -57,14 +57,14 @@ def temp_info(engine, codes):
 		except BaseException, e:
 			print e
 			pl.log(tbl + " error for " + code)
-		if cnt % 100 == 99:
+		cnt += 1
+		if cnt % 100 == 0:
 			pl.log("process %i codes" % cnt)
 			if(first):
 				df.to_sql(tbl,engine,if_exists='replace')
 				first = False
 			else:
 				df.to_sql(tbl,engine,if_exists='append')
-		cnt += 1
 	if(first):
 		df.to_sql(tbl,engine,if_exists='replace')
 	else:
