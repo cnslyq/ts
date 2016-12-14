@@ -101,7 +101,6 @@ def margin_sh_dtl(engine, sdate, edate):
 		df.to_sql(tbl,engine,if_exists='append')
 		pl.log(tbl + " done")
 	except BaseException, e:
-		print
 		print e
 		pl.log(tbl + " error")
 		
@@ -128,10 +127,8 @@ def margin_sz_dtl(engine, ddate, log=True):
 		df = df.set_index('opDate', drop='true')
 		df.to_sql(tbl,engine,if_exists='append')
 		if(log):
-			print
 			pl.log(tbl + " done")
 	except BaseException, e:
-		print
 		print e
 		pl.log(tbl + " error")
 		

@@ -32,7 +32,7 @@ def day_boxoffice(engine, cdate):
 	pl.log(tbl + " start...")
 	try:
 		df = ts.day_boxoffice()
-		df['date'] = cdate - datetime.timedelta(days=1))
+		df['date'] = cdate - datetime.timedelta(days=1)
 		df.to_sql(tbl,engine,if_exists='append')
 		pl.log(tbl + " done")
 	except BaseException, e:

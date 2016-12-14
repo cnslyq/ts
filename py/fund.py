@@ -22,7 +22,7 @@ def init(engine, session):
 	pl.log("get latest codes done")
 	# insert latest info into fund_temp_info
 	# rmcodes = ['37001B', '16162A', '16300L']
-	temp_info(engine, codes)
+	temp_info(engine, codes, session, 1)
 	# update fund_temp_info to fund_info
 	pl.log("call update_fund_info start...")
 	session.execute('call update_fund_info')
@@ -46,12 +46,13 @@ def history(engine, session, sdate, edate):
 	for code in codes:
 		nav_history(code, sdate, edate)
 
-def temp_info(engine, codes):
+def temp_info(engine, codes, session=None, clean=0):
 	tbl = "fund_temp_info"
 	temp = []
 	pl.log(tbl + " start...")
-	cnt = 1
-	first = 0
+	if clean:
+		session.execute("delete from " + tbl)
+	cnt = 0
 	df = pd.DataFrame()
 	for code in codes:
 		try:
@@ -65,19 +66,12 @@ def temp_info(engine, codes):
 		cnt += 1
 		if cnt % pc.FUND_GC_NUM is 0:
 			pl.log("process %i codes" % cnt)
-			if first:
-				df.to_sql(tbl,engine,if_exists='replace')
-				first = 0
-			else:
-				df.to_sql(tbl,engine,if_exists='append')
+			df.to_sql(tbl,engine,if_exists='append')
 			del df
 			gc.collect()
 			df = pd.DataFrame()
 	if df is not None:
-		if first:
-			df.to_sql(tbl,engine,if_exists='replace')
-		else:
-			df.to_sql(tbl,engine,if_exists='append')
+		df.to_sql(tbl,engine,if_exists='append')
 	pl.log(tbl + " done")
 	if len(temp) != 0:
 		temp_info(engine, temp)
