@@ -3,24 +3,21 @@ import datetime
 import pylog as pl
 import pyutil as pu
 import gc
+import pandas as pd
 
 def init(engine, session):
 	# get latest codes
 	pl.log("get latest codes start...")
 	codes = []
-	close = ts.get_nav_close().symbol.values
+	df = ts.get_nav_close().symbol.values
 	print
-	codes += [str(item) for item in close]
-	grading = ts.get_nav_grading().symbol.values
+	codes += [str(item) for item in df]
+	df = ts.get_nav_grading().symbol.values
 	print
-	codes += [str(item) for item in grading]
-	open = ts.get_nav_open().symbol.values
+	codes += [str(item) for item in df]
+	df = ts.get_nav_open().symbol.values
 	print
-	codes += [str(item) for item in open]
-	del close
-	del grading
-	del open
-	gc.collect()
+	codes += [str(item) for item in df]
 	pl.log("get latest codes done")
 	# insert latest info into fund_temp_info
 	# rmcodes = ['37001B', '16162A', '16300L']
@@ -52,33 +49,30 @@ def temp_info(engine, codes):
 	tbl = "fund_temp_info"
 	temp = []
 	pl.log(tbl + " start...")
-	cnt = 0
-	first = True
+	cnt = 1
+	first = 0
+	df = pd.DataFrame()
 	for code in codes:
 		try:
-			if cnt % 500 == 0:
-				df = ts.get_fund_info(code).reset_index()
-			else:
-				newdf = ts.get_fund_info(code).reset_index()
-				df = df.append(newdf, ignore_index=True)
-				del newdf
-				gc.collect()
+			newdf = ts.get_fund_info(code).reset_index()
+			df = df.append(newdf, ignore_index=True)
 		except BaseException, e:
 			print e
 			pl.log(tbl + " error for " + code)
 			if 'timed out' in str(e):
 				temp.append(code)
 		cnt += 1
-		if cnt % 500 == 0:
+		if cnt % 512 is 0:
 			pl.log("process %i codes" % cnt)
-			if(first):
+			if first:
 				df.to_sql(tbl,engine,if_exists='replace')
-				first = False
+				first = 0
 			else:
 				df.to_sql(tbl,engine,if_exists='append')
 			del df
 			gc.collect()
-	if(first):
+			df = pd.DataFrame()
+	if first:
 		df.to_sql(tbl,engine,if_exists='replace')
 	else:
 		df.to_sql(tbl,engine,if_exists='append')

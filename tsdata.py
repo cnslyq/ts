@@ -14,16 +14,17 @@ import tsdata as td
 	hm   ->  history_m
 	hq   ->  history_q
 '''
-INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq']
+INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq', 'hy']
 # INIT_LIST = ['py.stock', 'py.macro', 'py.fund']
 INIT_LIST = ['py.fund']
 HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest', 'py.fund']
-DAILY_LIST = ['py.trade', 'py.invest', 'py.fund', 'py.futures']
+DAILY_LIST = ['py.trade', 'py.invest', 'py.fund', 'py.other']
 WEEKLY_LIST = ['py.tops', 'py.invest']
-MONTHLY_LIST = ['py.stock', 'py.macro', 'py.tops', 'py.invest', 'py.basic', 'py.fund']
+MONTHLY_LIST = ['py.stock', 'py.macro', 'py.tops', 'py.invest', 'py.basic', 'py.fund', 'py.other']
 QUARTERLY_LIST = ['py.invest', 'py.basic', 'py.fund']
 HISTORY_M_LIST = ['py.invest']
 HISTORY_Q_LIST = ['py.invest', 'py.basic']
+HISTORY_Y_LIST = ['py.other']
 
 ENGINE = 'mysql://root:123456@127.0.0.1/test?charset=utf8'
 engine = create_engine(ENGINE)
@@ -73,6 +74,12 @@ def hq():
 		sys.exit(1)
 	call('history_q', int(sys.argv[2]), int(sys.argv[3]))
 	
+def hy():
+	if len(sys.argv) < 3:
+		print("please input year ")
+		sys.exit(1)
+	call('history_y', int(sys.argv[2]))
+	
 def cron(cdate = datetime.date.today()):
 	# process today's data
 	call('daily', cdate)
@@ -93,7 +100,7 @@ def cron(cdate = datetime.date.today()):
 
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
-		print("please input function name (init/hist/cron/hm/hq)")
+		print("please input function name (init/hist/cron/hm/hq/hy)")
 		sys.exit(1)
 	inp = sys.argv[1]
 	if inp in INPUT_LIST:

@@ -2,17 +2,19 @@ import tushare as ts
 import datetime
 import pylog as pl
 import pyutil as pu
+import gc
+import pandas as pd
 
 def history(engine, session, sdate, edate):
 	codes = pu.get_stock_codes(session)
 	cnt = 0
+	dfh = pd.DataFrame()
+	dfb = pd.DataFrame()
 	for code in codes:
 		# pl.log("processs code : " + code)
 		try:
-			df = ts.get_k_data(code, start=str(sdate), end=str(edate))
-			if df is not None:
-				df = df.set_index('code', drop='true')
-				df.to_sql('trade_market_history', engine, if_exists='append')
+			newdf = ts.get_k_data(code, start=str(sdate), end=str(edate))
+			dfh = dfh.append(newdf, ignore_index=True)
 		except BaseException, e:
 			print e
 			pl.log("trade_market_history error for %s" % code)
@@ -21,18 +23,26 @@ def history(engine, session, sdate, edate):
 		while cdate <= edate:
 			if pu.is_tddate(session, cdate):
 				try:
-					df = ts.get_sina_dd(code, cdate, vol=10000)
-					if df is not None:
-						df = df.set_index('code', drop='true')
-						df['date'] = cdate
-						df.to_sql('trade_block', engine, if_exists='append')
+					newdf = ts.get_sina_dd(code, cdate, vol=10000)
+					dfb = dfb.append(newdf, ignore_index=True)
 				except BaseException, e:
 					print e
 					pl.log("trade_block error for %s on %s" % (code, str(cdate)))
 			cdate += datetime.timedelta(days=1)
 		cnt += 1
-		if cnt % 100 == 0:
+		if cnt % 128 is 0:
+			dfh = dfh.set_index('code', drop='true')
+			dfh.to_sql('trade_market_history', engine, if_exists='append')
+			if dfb is not None:
+				dfb = dfb.set_index('code', drop='true')
+				dfb['date'] = cdate
+				dfb.to_sql('trade_block', engine, if_exists='append')
 			pl.log("process %i codes" % cnt)
+			del dfh
+			del dfb
+			gc.collect()
+			dfh = pd.DataFrame()
+			dfb = pd.DataFrame()
 
 def daily(engine, session, cdate):
 	if pu.is_tddate(session, cdate):
