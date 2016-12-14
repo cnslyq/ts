@@ -141,3 +141,18 @@ create table invest_margin_sz_dtl(
 );
 alter table invest_margin_sz_dtl add index invest_margin_sz_dtl_date_idx (`opDate`);
 alter table invest_margin_sz_dtl add index invest_margin_sz_dtl_code_idx (`stockCode`);
+
+drop table if exists invest_top10_holders; 
+create table invest_top10_holders(
+	`id` bigint(20) primary key not null auto_increment,
+	`code` varchar(8),
+	`quarter` date,
+	`name` varchar(128),
+	`hold` double,
+	`h_pro` double,
+	`sharetype` varchar(64),
+	`status` varchar(16),
+	`create_date` timestamp not null default CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+alter table invest_top10_holders add index invest_top10_holders_date_idx (`quarter`);
+alter table invest_top10_holders add index invest_top10_holders_code_idx (`code`);

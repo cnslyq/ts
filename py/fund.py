@@ -4,6 +4,7 @@ import pylog as pl
 import pyutil as pu
 import gc
 import pandas as pd
+import pyconfig as pc
 
 def init(engine, session):
 	# get latest codes
@@ -62,7 +63,7 @@ def temp_info(engine, codes):
 			if 'timed out' in str(e):
 				temp.append(code)
 		cnt += 1
-		if cnt % 512 is 0:
+		if cnt % pc.FUND_GC_NUM is 0:
 			pl.log("process %i codes" % cnt)
 			if first:
 				df.to_sql(tbl,engine,if_exists='replace')

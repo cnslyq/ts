@@ -2,6 +2,9 @@ import tushare as ts
 import datetime
 import pylog as pl
 import pyutil as pu
+import gc
+import pandas as pd
+import pyconfig as pc
 
 def history(engine, session, sdate, edate):
 	margin_sh_smry(engine, str(sdate), str(edate))
@@ -18,7 +21,11 @@ def history_m(engine, session, year, month):
 	lifted(engine, year, month)
 
 def history_q(engine, session, year, quarter):
-	quarterly(engine, session, year, quarter)
+	forecast_history(engine, year, quarter)
+	fund_hold(engine, year, quarter)
+
+def history_a(engine, session):
+	top10_holders(engine, session)
 
 def daily(engine, session, cdate):
 	ddate = cdate - datetime.timedelta(days=1)
@@ -41,128 +48,161 @@ def monthly(engine, session, year, month):
 	new_stock(engine)
 	
 def quarterly(engine, session, year, quarter):
-	forecast_history(engine, year, quarter)
-	fund_hold(engine, year, quarter)
+	history_q(engine, session, year, quarter)
+	top10_holders(engine, session, year, quarter)
+	
+def top10_holders(engine, session, year=None, quarter=None):
+	tbl = "invest_top10_holders"
+	pl.log(tbl + " start...")
+	codes = pu.get_stock_codes(session)
+	cnt = 0
+	df = pd.DataFrame()
+	for code in codes:
+		try:
+			newdf = ts.top10_holders(code, year, quarter)[1]
+			newdf['code'] = code
+			df = df.append(newdf, ignore_index=True)
+		except BaseException, e:
+			print e
+			pl.log(tbl + " error for " + code)
+		cnt += 1
+		if cnt % pc.INVEST_GC_NUM is 0:
+			df = df.set_index('code', drop='true')
+			df.to_sql(tbl, engine, if_exists='append')
+			pl.log("process %i codes" % cnt)
+			del df
+			gc.collect()
+			df = pd.DataFrame()
+	pl.log(tbl + " done")
 
 def margin_sh_smry(engine, sdate, edate):
-	pl.log("invest_margin_sh_smry start...")
+	tbl = "invest_margin_sh_smry"
+	pl.log(tbl + " start...")
 	try:
 		df = ts.sh_margins(sdate, edate)
 		df = df.set_index('opDate', drop='true')
-		df.to_sql('invest_margin_sh_smry',engine,if_exists='append')
+		df.to_sql(tbl,engine,if_exists='append')
 		print
-		pl.log("invest_margin_sh_smry done")
+		pl.log(tbl + " done")
 	except BaseException, e:
 		print
 		print e
-		pl.log("invest_margin_sh_smry error")
+		pl.log(tbl + " error")
 
 def margin_sh_dtl(engine, sdate, edate):
-	pl.log("invest_margin_sh_dtl start...")
+	tbl = invest_margin_sh_dtl
+	pl.log(tbl + " start...")
 	try:
 		df = ts.sh_margin_details(sdate, edate)
 		df = df.set_index('opDate', drop='true')
-		df.to_sql('invest_margin_sh_dtl',engine,if_exists='append')
-		pl.log("invest_margin_sh_dtl done")
+		df.to_sql(tbl,engine,if_exists='append')
+		pl.log(tbl + " done")
 	except BaseException, e:
 		print
 		print e
-		pl.log("invest_margin_sh_dtl error")
+		pl.log(tbl + " error")
 		
 def margin_sz_smry(engine, sdate, edate):
-	pl.log("invest_margin_sz_smry start...")
+	tbl = "invest_margin_sz_smry"
+	pl.log(tbl + " start...")
 	try:
 		df = ts.sz_margins(sdate, edate)
 		df = df.set_index('opDate', drop='true')
-		df.to_sql('invest_margin_sz_smry',engine,if_exists='append')
+		df.to_sql(tbl,engine,if_exists='append')
 		print
-		pl.log("invest_margin_sz_smry done")
+		pl.log(tbl + " done")
 	except BaseException, e:
 		print
 		print e
-		pl.log("invest_margin_sz_smry error")
+		pl.log(tbl + " error")
 		
 def margin_sz_dtl(engine, ddate, log=True):
+	tbl = "invest_margin_sz_dtl"
 	if(log):
-		pl.log("invest_margin_sz_dtl start...")
+		pl.log(tbl + " start...")
 	try:
 		df = ts.sz_margin_details(ddate)
 		df = df.set_index('opDate', drop='true')
-		df.to_sql('invest_margin_sz_dtl',engine,if_exists='append')
+		df.to_sql(tbl,engine,if_exists='append')
 		if(log):
 			print
-			pl.log("invest_margin_sz_dtl done")
+			pl.log(tbl + " done")
 	except BaseException, e:
 		print
 		print e
-		pl.log("invest_margin_sz_dtl error")
+		pl.log(tbl + " error")
 		
 def lifted(engine, year, month):
 	# pu.to_sql(engine, 'invest_lifted', plist=[year, month])
-	pl.log("invest_lifted start...")
+	tbl = "invest_lifted"
+	pl.log(tbl + " start...")
 	try:
 		df = ts.xsg_data(year, month)
 		df = df.set_index('code', drop='true')
-		df.to_sql('invest_lifted',engine,if_exists='append')
-		pl.log("invest_lifted done")
+		df.to_sql(tbl,engine,if_exists='append')
+		pl.log(tbl + " done")
 	except BaseException, e:
 		print
 		print e
-		pl.log("invest_lifted error")
+		pl.log(tbl + " error")
 		
 def new_stock(engine):
-	pl.log("invest_new_stock start...")
+	tbl = "invest_new_stock"
+	pl.log(tbl + " start...")
 	try:
 		df = ts.new_stocks()
 		df['date'] = datetime.date.today()
 		df = df.set_index('code', drop='true')
-		df.to_sql('invest_new_stock',engine,if_exists='append')
+		df.to_sql(tbl,engine,if_exists='append')
 		print
-		pl.log("invest_new_stock done")
+		pl.log(tbl + " done")
 	except BaseException, e:
 		print
 		print e
-		pl.log("invest_new_stock error")
+		pl.log(tbl + " error")
 		
 def forecast(engine, year, quarter):
-	pl.log("invest_forecast start...")
+	tbl = "invest_forecast"
+	pl.log(tbl + " start...")
 	try:
 		df = ts.forecast_data(year, quarter)
 		df['year'] = year
 		df['quarter'] = quarter
 		df = df.set_index('code', drop='true')
-		df.to_sql('invest_forecast',engine,if_exists='replace')
+		df.to_sql(tbl,engine,if_exists='replace')
 		print
-		pl.log("invest_forecast done")
+		pl.log(tbl + " done")
 	except BaseException, e:
 		print
 		print e
-		pl.log("invest_forecast error")
+		pl.log(tbl + " error")
 		
 def forecast_history(engine, year, quarter):
-	pl.log("invest_forecast_history start...")
+	tbl = "invest_forecast_history"
+	pl.log(tbl + " start...")
 	try:
 		df = ts.forecast_data(year, quarter)
 		df['year'] = year
 		df['quarter'] = quarter
 		df = df.set_index('code', drop='true')
-		df.to_sql('invest_forecast_history',engine,if_exists='append')
+		df.to_sql(tbl,engine,if_exists='append')
 		print
-		pl.log("invest_forecast_history done")
+		pl.log(tbl + " done")
 	except BaseException, e:
 		print
 		print e
-		pl.log("invest_forecast_history error")
+		pl.log(tbl + " error")
 		
 def fund_hold(engine, year, quarter):
-	pl.log("invest_fund_hold start...")
+	tbl = "invest_fund_hold"
+	pl.log(tbl + " start...")
 	try:
 		df = ts.fund_holdings(year, quarter)
 		df = df.set_index('code', drop='true')
-		df.to_sql('invest_fund_hold',engine,if_exists='append')
+		df.to_sql(tbl,engine,if_exists='append')
 		print
-		pl.log("invest_fund_hold done")
+		pl.log(tbl + " done")
 	except BaseException, e:
 		print
 		print e
-		pl.log("invest_fund_hold error")
+		pl.log(tbl + " error")

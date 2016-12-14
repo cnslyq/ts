@@ -4,6 +4,7 @@ import pylog as pl
 import pyutil as pu
 import gc
 import pandas as pd
+import pyconfig as pc
 
 def history(engine, session, sdate, edate):
 	codes = pu.get_stock_codes(session)
@@ -30,7 +31,7 @@ def history(engine, session, sdate, edate):
 					pl.log("trade_block error for %s on %s" % (code, str(cdate)))
 			cdate += datetime.timedelta(days=1)
 		cnt += 1
-		if cnt % 128 is 0:
+		if cnt % pc.TRADE_GC_NUM is 0:
 			dfh = dfh.set_index('code', drop='true')
 			dfh.to_sql('trade_market_history', engine, if_exists='append')
 			if dfb is not None:
