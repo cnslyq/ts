@@ -14,7 +14,7 @@ import tsdata as td
 	hm   ->  history_m
 	hq   ->  history_q
 '''
-INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq', 'hy', 'ha']
+INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq', 'hy', 'ha', 'real']
 # INIT_LIST = ['py.stock', 'py.macro', 'py.fund']
 INIT_LIST = ['py.fund']
 HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest', 'py.fund']
@@ -26,6 +26,7 @@ HISTORY_M_LIST = ['py.invest', 'py.other']
 HISTORY_Q_LIST = ['py.invest', 'py.basic']
 HISTORY_Y_LIST = ['py.other']
 HISTORY_A_LIST = ['py.invest']
+REAL_LIST = ['py.news']
 
 ENGINE = 'mysql://root:123456@127.0.0.1/test?charset=utf8'
 engine = create_engine(ENGINE)
@@ -83,6 +84,9 @@ def hy():
 	
 def ha():
 	call('history_a')
+	
+def real():
+	call('real')
 	
 def cron(cdate = datetime.date.today()):
 	# process today's data
