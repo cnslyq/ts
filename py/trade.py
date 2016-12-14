@@ -44,6 +44,13 @@ def history(engine, session, sdate, edate):
 			gc.collect()
 			dfh = pd.DataFrame()
 			dfb = pd.DataFrame()
+	if dfh is not None:
+		dfh = dfh.set_index('code', drop='true')
+		dfh.to_sql('trade_market_history', engine, if_exists='append')
+	if dfb is not None:
+		dfb = dfb.set_index('code', drop='true')
+		dfb['date'] = cdate
+		dfb.to_sql('trade_block', engine, if_exists='append')
 
 def daily(engine, session, cdate):
 	if pu.is_tddate(session, cdate):

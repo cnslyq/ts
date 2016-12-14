@@ -73,6 +73,9 @@ def top10_holders(engine, session, year=None, quarter=None):
 			del df
 			gc.collect()
 			df = pd.DataFrame()
+	if df is not None:
+		df = df.set_index('code', drop='true')
+		df.to_sql(tbl, engine, if_exists='append')
 	pl.log(tbl + " done")
 
 def margin_sh_smry(engine, sdate, edate):

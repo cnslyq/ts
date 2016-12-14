@@ -73,10 +73,11 @@ def temp_info(engine, codes):
 			del df
 			gc.collect()
 			df = pd.DataFrame()
-	if first:
-		df.to_sql(tbl,engine,if_exists='replace')
-	else:
-		df.to_sql(tbl,engine,if_exists='append')
+	if df is not None:
+		if first:
+			df.to_sql(tbl,engine,if_exists='replace')
+		else:
+			df.to_sql(tbl,engine,if_exists='append')
 	pl.log(tbl + " done")
 	if len(temp) != 0:
 		temp_info(engine, temp)
