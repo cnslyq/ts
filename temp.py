@@ -7,6 +7,8 @@ tmonth = today.month
 tquarter = (tmonth-1)/3 + 1
 
 for year in range(2013, tyear):
+	print 'year data : %i' % year
+	os.system('python /home/ts/tsdata.py hy %i' % year)
 	for month in range(1, 13):
 		print 'month data : %i %i' % (year, month)
 		os.system('python /home/ts/tsdata.py hm %i %i' % (year, month))

@@ -5,6 +5,11 @@ import datetime
 def daily(engine, session, cdate):
 	futures_ifs(engine, cdate)
 	global_index(engine, cdate)
+	day_boxoffice(engine, cdate)
+
+def history_m(engine, session, year, month):
+	ddate='%i-%i' % (year, month)
+	month_boxoffice(engine, ddate)
 
 def history_y(engine, session, year):
 	shibor(engine, year)
@@ -20,6 +25,31 @@ def monthly(engine, session, year, month):
 	shibor_ma(engine, year, sdate)
 	lpr(engine, year, sdate)
 	lpr_ma(engine, year, sdate)
+	month_boxoffice(engine)
+
+def day_boxoffice(engine, cdate):
+	tbl = "day_boxoffice"
+	pl.log(tbl + " start...")
+	try:
+		df = ts.day_boxoffice()
+		df['date'] = cdate - datetime.timedelta(days=1))
+		df.to_sql(tbl,engine,if_exists='append')
+		pl.log(tbl + " done")
+	except BaseException, e:
+		print e
+		pl.log(tbl + " error")
+
+def month_boxoffice(engine, ddate=None):
+	tbl = "month_boxoffice"
+	pl.log(tbl + " start...")
+	try:
+		df = ts.month_boxoffice(ddate)
+		df['date'] = ddate
+		df.to_sql(tbl,engine,if_exists='append')
+		pl.log(tbl + " done")
+	except BaseException, e:
+		print e
+		pl.log(tbl + " error")
 
 def shibor(engine, year, sdate=None):
 	tbl = "shibor"
