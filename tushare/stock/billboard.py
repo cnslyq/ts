@@ -72,9 +72,9 @@ def top_list(date = None, retry_count=3, pause=0.001):
                                            dict(__getitem__ = lambda s, n:n))())
             text = json.dumps(text)
             text = json.loads(text)
-            for i in range(len(text['data'])):
-                if text['data'][i]['Smoney'] == u'':
-                    text['data'][i]['Smoney'] = u'0'
+            for item in text['data']:
+                if item['Smoney'] is u'':
+                    item['Smoney'] = u'0'
             df = pd.DataFrame(text['data'], columns=rv.LHB_TMP_COLS)
             df.columns = rv.LHB_COLS
             df['buy'] = df['buy'].astype(float)
@@ -91,8 +91,7 @@ def top_list(date = None, retry_count=3, pause=0.001):
                 df[col] = df[col] / 10000
                 df[col] = df[col].map(ct.FORMAT)
             df = df.drop('Turnover', axis=1)
-        except BaseException, e:
-            print e
+        except:
             pass
         else:
             return df
