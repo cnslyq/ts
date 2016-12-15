@@ -1,15 +1,22 @@
 ###1.create table and procedure, initlize dictionary data, 
-    source /home/ts/db.sql
+    source tsdata_path/db.sql
 
-###2.get finance data through python interface
-    python /home/ts/data_init.py
+###2.usage
+    alias tsdata='python tsdata_path/tsdata.py'
 
-###3.usage
-    alias tsdata='python /home/ts/tsdata.py'
-####a.cron task
-    tsdata cron
-####b.fetch history data
-    date range : tsdata hist startdate enddate  
-    month data : tsdata hm year month  
-    quarter datat : tsdata hq year quarter  
+####init data
+- tsdata init
+
+####cron task
+- tsdata cron
+
+####history data
+- date range : tsdata hist startdate enddate
+- month data : tsdata hm year month
+- quarter data : tsdata hq year quarter
+- year data : tsdata hy year
+- all data : tsdata ha
+
+####real data
+- tsdata real
 
