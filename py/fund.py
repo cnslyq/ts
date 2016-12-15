@@ -20,7 +20,6 @@ def init(engine, session):
 	df = tsf.get_nav_grading().symbol.values
 	print
 	codes.extend([str(item) for item in df])
-	codes = (item for item in codes)
 	pl.log("get latest codes done")
 	# insert latest info into fund_temp_info
 	# rmcodes = ['37001B', '16162A', '16300L']
@@ -57,7 +56,7 @@ def temp_info(engine, codes):
 	df = pd.DataFrame()
 	for code in codes:
 		try:
-			newdf = tsf.get_fund_info(code).reset_index()
+			newdf = tsf.get_fund_info(code)
 			df = df.append(newdf, ignore_index=True)
 		except BaseException, e:
 			print e
