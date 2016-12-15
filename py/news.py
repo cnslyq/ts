@@ -16,6 +16,7 @@ def news_real(engine):
 		et = '%i-%i %i:00' % (et.month, et.day, et.hour)
 		df = df[df.time >= et]
 		df = df[df.time < st]
+		df = df.sort_values('time')
 		df = df.set_index('time', drop='true')
 		df.to_sql(tbl,engine,if_exists='append')
 		pl.log(tbl + " done")
