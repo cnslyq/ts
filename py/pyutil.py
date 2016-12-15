@@ -8,13 +8,19 @@ def get_stock_codes(session, vip=False):
 	if(vip):
 		sql += " where is_hs300 = 1 or is_sz50 = 1 or is_zz500 = 1"
 	codes = session.query("code").from_statement(text(sql)).all()
-	codes = [item[0].encode('utf8') for item in codes]
+	codes = (item[0].encode('utf8') for item in codes)
 	return codes
 
 def get_fund_codes(session):
 	sql = "select symbol from fund_info"
 	codes = session.query("symbol").from_statement(text(sql)).all()
-	codes = [item[0].encode('utf8') for item in codes]
+	codes = (item[0].encode('utf8') for item in codes)
+	return codes
+
+def get_fund_temp_codes(session):
+	sql = "select symbol from fund_temp_info"
+	codes = session.query("symbol").from_statement(text(sql)).all()
+	codes = (item[0].encode('utf8') for item in codes)
 	return codes
 
 def is_tddate(session, date):

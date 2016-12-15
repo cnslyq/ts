@@ -1,4 +1,5 @@
-import tushare as ts
+# import tushare as ts
+import tushare.fund.nav as tsf
 import datetime
 import pylog as pl
 import pyutil as pu
@@ -10,22 +11,24 @@ def init(engine, session):
 	# get latest codes
 	pl.log("get latest codes start...")
 	codes = []
-	df = ts.get_nav_close().symbol.values
+	df = tsf.get_nav_open().symbol.values
 	print
-	codes += [str(item) for item in df]
-	df = ts.get_nav_grading().symbol.values
+	codes.extend([str(item) for item in df])
+	df = tsf.get_nav_close().symbol.values
 	print
-	codes += [str(item) for item in df]
-	df = ts.get_nav_open().symbol.values
+	codes.extend([str(item) for item in df])
+	df = tsf.get_nav_grading().symbol.values
 	print
-	codes += [str(item) for item in df]
+	codes.extend([str(item) for item in df])
+	codes = (item for item in codes)
 	pl.log("get latest codes done")
 	# insert latest info into fund_temp_info
 	# rmcodes = ['37001B', '16162A', '16300L']
-	temp_info(engine, codes, session, 1)
+	session.execute("delete from fund_temp_info")
+	temp_info(engine, codes)
 	# update fund_temp_info to fund_info
 	pl.log("call update_fund_info start...")
-	session.execute('call update_fund_info')
+	# session.execute('call update_fund_info')
 	pl.log("call update_fund_info done")
 	
 def daily(engine, session, cdate):
@@ -46,17 +49,15 @@ def history(engine, session, sdate, edate):
 	for code in codes:
 		nav_history(code, sdate, edate)
 
-def temp_info(engine, codes, session=None, clean=0):
+def temp_info(engine, codes):
 	tbl = "fund_temp_info"
 	temp = []
 	pl.log(tbl + " start...")
-	if clean:
-		session.execute("delete from " + tbl)
 	cnt = 0
 	df = pd.DataFrame()
 	for code in codes:
 		try:
-			newdf = ts.get_fund_info(code).reset_index()
+			newdf = tsf.get_fund_info(code).reset_index()
 			df = df.append(newdf, ignore_index=True)
 		except BaseException, e:
 			print e
@@ -80,7 +81,7 @@ def nav_open(engine, cdate):
 	tbl = "fund_nav_open"
 	pl.log(tbl + " start...")
 	try:
-		df = ts.get_nav_open()
+		df = tsf.get_nav_open()
 		df = df.set_index('symbol', drop='true')
 		df = df[df.nav_date==str(cdate)]
 		df.to_sql(tbl,engine,if_exists='append')
@@ -95,7 +96,7 @@ def nav_close(engine, cdate):
 	tbl = "fund_nav_close"
 	pl.log(tbl + " start...")
 	try:
-		df = ts.get_nav_close()
+		df = tsf.get_nav_close()
 		df = df.set_index('symbol', drop='true')
 		df = df[df.nav_date==str(cdate)]
 		df.to_sql(tbl,engine,if_exists='append')
@@ -110,7 +111,7 @@ def nav_grading(engine, cdate):
 	tbl = "fund_nav_grading"
 	pl.log(tbl + " start...")
 	try:
-		df = ts.get_nav_grading()
+		df = tsf.get_nav_grading()
 		df = df.set_index('symbol', drop='true')
 		df = df[df.nav_date==str(cdate)]
 		df.to_sql(tbl,engine,if_exists='append')
@@ -125,7 +126,7 @@ def nav_history(engine, code, sdate, edate):
 	tbl = "fund_nav_history"
 	pl.log(tbl + " start...")
 	try:
-		df = ts.get_nav_history(code, str(sdate), str(edate))
+		df = tsf.get_nav_history(code, str(sdate), str(edate))
 		df['symbol'] = code
 		df.to_sql(tbl,engine,if_exists='append')
 		print
