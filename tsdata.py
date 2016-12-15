@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker
 import datetime
 import py.pylog as pl
 import py.pyutil as pu
+import py.pyconfig as pc
 import sys
 import tsdata as td
 
@@ -13,10 +14,12 @@ import tsdata as td
 	cron ->  daily, weekly, monthly, quarterly
 	hm   ->  history_m
 	hq   ->  history_q
+	hy   ->  history_y
+	ha   ->  history_a
+	real ->  real
 '''
 INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq', 'hy', 'ha', 'real']
-# INIT_LIST = ['py.stock', 'py.macro', 'py.fund']
-INIT_LIST = ['py.fund']
+INIT_LIST = ['py.stock', 'py.macro', 'py.fund']
 HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest', 'py.fund']
 DAILY_LIST = ['py.trade', 'py.invest', 'py.fund', 'py.other']
 WEEKLY_LIST = ['py.tops', 'py.invest']
@@ -28,8 +31,7 @@ HISTORY_Y_LIST = ['py.other']
 HISTORY_A_LIST = ['py.invest']
 REAL_LIST = ['py.news']
 
-ENGINE = 'mysql://root:123456@127.0.0.1/test?charset=utf8'
-engine = create_engine(ENGINE)
+engine = create_engine(pc.ENGINE)
 Session = sessionmaker(bind=engine)
 session = Session()
 
