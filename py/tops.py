@@ -7,7 +7,7 @@ def history(engine, session, sdate, edate):
 	cdate = sdate
 	pl.log("tops_list start...")
 	while cdate <= edate:
-		if pu.is_tddate(session, cdate):
+		if not pu.is_holiday(cdate):
 			try:
 				df = ts.top_list(str(cdate))
 				if df is not None:

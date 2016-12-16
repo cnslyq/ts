@@ -1,8 +1,6 @@
 from sqlalchemy import text
-import tushare as ts
-import pylog as pl
+import datetime
 
-cal = None
 def get_stock_codes(session, vip=False):
 	sql = "select code from stock_info"
 	if(vip):
@@ -17,18 +15,16 @@ def get_fund_codes(session):
 	codes = (item[0].encode('utf8') for item in codes)
 	return codes
 
-def get_fund_temp_codes(session):
-	sql = "select symbol from fund_temp_info"
-	codes = session.query("symbol").from_statement(text(sql)).all()
-	codes = (item[0].encode('utf8') for item in codes)
-	return codes
-
-def is_tddate(session, date):
-	global cal
-	if cal is None:
-		cal = session.query("date", "is_open").from_statement(text("select date, is_open from calendar")).all()
-		cal = {item[0]:item[1] for item in cal}
-	return cal[date]
+holiday = ('2015-01-01', '2015-01-02', '2015-02-18', '2015-02-19', '2015-02-20', '2015-02-23', '2015-02-24',
+		   '2015-04-06', '2015-05-01', '2015-06-22', '2015-09-03', '2015-09-04', '2015-10-01', '2015-10-02',
+		   '2015-10-05', '2015-10-06', '2015-10-07',
+		   '2016-01-01', '2016-02-08', '2016-02-09', '2016-02-10', '2016-02-11', '2016-02-12', '2016-04-04',
+		   '2016-05-02', '2016-06-09', '2016-06-10', '2016-09-15', '2016-09-16', '2016-10-03', '2016-10-04',
+		   '2016-10-05', '2016-10-06', '2016-10-07')
+def is_holiday(date):
+	if isinstance(date, str):
+		today = datetime.datetime.strptime(date, '%Y-%m-%d')
+	return today.isoweekday() in [6, 7] or date in holiday
 
 def get_ldate(date, diff):
 	ldate = {}
@@ -41,8 +37,10 @@ def get_ldate(date, diff):
 	return ldate
 	
 
-
 '''
+import tushare as ts
+import pylog as pl
+
 tfmap = {'trade_market_history':'get_k_data',
 		'trade_market_today':'get_today_all',
 		'trade_index_today':'get_index',

@@ -22,7 +22,7 @@ def history(engine, session, sdate, edate):
 		
 		cdate = sdate
 		while cdate <= edate:
-			if pu.is_tddate(session, cdate):
+			if not pu.is_holiday(cdate):
 				try:
 					newdf = ts.get_sina_dd(code, cdate, vol=10000)
 					dfb = dfb.append(newdf, ignore_index=True)
@@ -53,7 +53,7 @@ def history(engine, session, sdate, edate):
 		dfb.to_sql('trade_block', engine, if_exists='append')
 
 def daily(engine, session, cdate):
-	if pu.is_tddate(session, cdate):
+	if not pu.is_holiday(cdate):
 		pl.log("trade_index_today start...")
 		try:
 			df = ts.get_index()

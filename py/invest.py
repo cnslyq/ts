@@ -13,7 +13,7 @@ def history(engine, session, sdate, edate):
 	margin_sz_smry(engine, str(sdate), str(edate))
 	cdate = sdate
 	while cdate <= edate:
-		if pu.is_tddate(session, cdate):
+		if not pu.is_holiday(cdate):
 			margin_sz_dtl(engine, str(cdate), log=False)
 		cdate += datetime.timedelta(days=1)
 	
@@ -29,7 +29,7 @@ def history_a(engine, session):
 
 def daily(engine, session, cdate):
 	ddate = cdate - datetime.timedelta(days=1)
-	if pu.is_tddate(session, ddate):
+	if not pu.is_holiday(ddate):
 		ddate = str(ddate)
 		margin_sh_smry(engine, ddate, ddate)
 		# no data, should be a bug
