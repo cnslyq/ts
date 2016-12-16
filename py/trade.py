@@ -87,30 +87,17 @@ def daily(engine, session, cdate):
 			pl.log("trade_market_today error")
 		
 		pl.log("trade_block start...")
-		df = pd.DataFrame()
-		cnt = 0
 		codes = pu.get_stock_codes(session)
 		for code in codes:
 			try:
-				newdf = ts.get_sina_dd(code, cdate, vol=10000)
-				df = df.append(newdf, ignore_index=True)
-			except BaseException, e:
-				print e
-				pl.log("trade_block error for " + code)
-			cnt += 1
-			if cnt % pc.TRADE_GC_NUM is 0:
+				df = ts.get_sina_dd(code, cdate, vol=10000)
 				if df is not None:
 					df = df.set_index('code', drop='true')
 					df['date'] = cdate
 					df.to_sql('trade_block', engine, if_exists='append')
-				pl.log("process %i codes" % cnt)
-				del df
-				gc.collect()
-				df = pd.DataFrame()
-		if df is not None:
-			df = df.set_index('code', drop='true')
-			df['date'] = cdate
-			df.to_sql('trade_block', engine, if_exists='append')
+			except BaseException, e:
+				print e
+				pl.log("trade_block error for " + code)
 		pl.log("trade_block done")
 	else:
 		pl.log("today is a holiday")

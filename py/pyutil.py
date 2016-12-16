@@ -37,9 +37,10 @@ holiday =  ('2013-01-01', '2013-01-02', '2013-01-03', '2013-02-11', '2013-02-12'
 			'2017-05-29', '2017-05-30', '2017-10-02', '2017-10-03', '2017-10-04', 
 			'2017-10-05', '2017-10-06')
 def is_holiday(date):
+	today = date
 	if isinstance(date, str):
 		today = datetime.datetime.strptime(date, '%Y-%m-%d')
-	return today.isoweekday() in [6, 7] or date in holiday
+	return today.isoweekday() in [6, 7] or today in holiday
 
 def get_ldate(date, diff):
 	ldate = {}
