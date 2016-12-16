@@ -52,6 +52,14 @@ def history(engine, session, sdate, edate):
 		dfb['date'] = cdate
 		dfb.to_sql('trade_block', engine, if_exists='append')
 
+def history_s(engine, session, code, year):
+	pl.log("get data for code : " + code + " year : " + year + " start...")
+	sdate = datetime.date(int(year), 1, 1)
+	edate = datetime.date(int(year), 12, 31)
+	df = ts.get_k_data(code, start=str(sdate), end=str(edate))
+	df.to_csv('/home/data/' + code + '_' + year + '.csv',columns=['date','open','close','high','low','volume'])
+	pl.log("get data for code : " + code + " year : " + year + " done")
+
 def daily(engine, session, cdate):
 	if not pu.is_holiday(cdate):
 		pl.log("trade_index_today start...")

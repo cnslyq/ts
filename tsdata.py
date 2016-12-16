@@ -16,9 +16,10 @@ import tsdata as td
 	hq   ->  history_q
 	hy   ->  history_y
 	ha   ->  history_a
+	hs   ->  history_s
 	real ->  real
 '''
-INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq', 'hy', 'ha', 'real']
+INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq', 'hy', 'ha', 'hs', 'real']
 INIT_LIST = ['py.stock', 'py.macro', 'py.fund']
 HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest', 'py.fund']
 DAILY_LIST = ['py.trade', 'py.invest', 'py.fund', 'py.other']
@@ -29,6 +30,7 @@ HISTORY_M_LIST = ['py.invest', 'py.other']
 HISTORY_Q_LIST = ['py.invest', 'py.basic']
 HISTORY_Y_LIST = ['py.other']
 HISTORY_A_LIST = ['py.invest']
+HISTORY_S_LIST = ['py.trade']
 REAL_LIST = ['py.news']
 
 engine = create_engine(pc.ENGINE)
@@ -87,6 +89,12 @@ def hy():
 def ha():
 	call('history_a')
 	
+def hs():
+	if len(sys.argv) < 4:
+		print("please input code, year ")
+		sys.exit(1)
+	call('history_s', sys.argv[2], sys.argv[3])
+	
 def real():
 	call('real')
 	
@@ -110,7 +118,7 @@ def cron(cdate = datetime.date.today()):
 
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
-		print("please input function name (init/hist/cron/hm/hq/hy/ha)")
+		print("please input function name (init/hist/cron/hm/hq/hy/ha/hs)")
 		sys.exit(1)
 	inp = sys.argv[1]
 	if inp in INPUT_LIST:
