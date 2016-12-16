@@ -12,8 +12,8 @@ def news_real(engine):
 		df = ts.get_latest_news()
 		st = datetime.datetime.today()
 		et = st - datetime.timedelta(hours=2)
-		st = '%i-%i %i:00' % (st.month, st.day, st.hour)
-		et = '%i-%i %i:00' % (et.month, et.day, et.hour)
+		st = '%i-%i %02i:00' % (st.month, st.day, st.hour)
+		et = '%i-%i %02i:00' % (et.month, et.day, et.hour)
 		df = df[df.time >= et]
 		df = df[df.time < st]
 		df = df.sort_values('time')
