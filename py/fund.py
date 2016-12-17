@@ -1,5 +1,4 @@
-# import tushare as ts
-import tushare.fund.nav as tsf
+import tushare as ts
 import datetime
 import pylog as pl
 import pyutil as pu
@@ -11,13 +10,13 @@ def init(engine, session):
 	# get latest codes
 	pl.log("get latest codes start...")
 	codes = []
-	df = tsf.get_nav_open().symbol.values
+	df = ts.get_nav_open().symbol.values
 	print
 	codes.extend([str(item) for item in df])
-	df = tsf.get_nav_close().symbol.values
+	df = ts.get_nav_close().symbol.values
 	print
 	codes.extend([str(item) for item in df])
-	df = tsf.get_nav_grading().symbol.values
+	df = ts.get_nav_grading().symbol.values
 	print
 	codes.extend([str(item) for item in df])
 	pl.log("get latest codes done")
@@ -27,7 +26,7 @@ def init(engine, session):
 	temp_info(engine, codes)
 	# update fund_temp_info to fund_info
 	pl.log("call update_fund_info start...")
-	# session.execute('call update_fund_info')
+	session.execute('call update_fund_info')
 	pl.log("call update_fund_info done")
 	
 def daily(engine, session, cdate):
@@ -44,9 +43,16 @@ def quarterly(engine, session, year, quarterly):
 	init(engine, session)
 	
 def history(engine, session, sdate, edate):
+	tbl = "fund_nav_history"
+	pl.log(tbl + " start...")
 	codes = pu.get_fund_codes(session)
+	cnt = 0
 	for code in codes:
-		nav_history(code, sdate, edate)
+		nav_history(engine, code, codes[code], sdate, edate)
+		cnt += 1
+		if cnt % pc.FUND_GC_NUM is 0:
+			pl.log("process %i codes" % cnt)
+	pl.log(tbl + " done")
 
 def temp_info(engine, codes):
 	tbl = "fund_temp_info"
@@ -56,7 +62,7 @@ def temp_info(engine, codes):
 	df = pd.DataFrame()
 	for code in codes:
 		try:
-			newdf = tsf.get_fund_info(code)
+			newdf = ts.get_fund_info(code)
 			df = df.append(newdf, ignore_index=True)
 		except BaseException, e:
 			print e
@@ -80,7 +86,7 @@ def nav_open(engine, cdate):
 	tbl = "fund_nav_open"
 	pl.log(tbl + " start...")
 	try:
-		df = tsf.get_nav_open()
+		df = ts.get_nav_open()
 		df = df.set_index('symbol', drop='true')
 		df = df[df.nav_date==str(cdate)]
 		df.to_sql(tbl,engine,if_exists='append')
@@ -95,7 +101,7 @@ def nav_close(engine, cdate):
 	tbl = "fund_nav_close"
 	pl.log(tbl + " start...")
 	try:
-		df = tsf.get_nav_close()
+		df = ts.get_nav_close()
 		df = df.set_index('symbol', drop='true')
 		df = df[df.nav_date==str(cdate)]
 		df.to_sql(tbl,engine,if_exists='append')
@@ -110,7 +116,7 @@ def nav_grading(engine, cdate):
 	tbl = "fund_nav_grading"
 	pl.log(tbl + " start...")
 	try:
-		df = tsf.get_nav_grading()
+		df = ts.get_nav_grading()
 		df = df.set_index('symbol', drop='true')
 		df = df[df.nav_date==str(cdate)]
 		df.to_sql(tbl,engine,if_exists='append')
@@ -121,16 +127,16 @@ def nav_grading(engine, cdate):
 		print e
 		pl.log(tbl + " error")
 
-def nav_history(engine, code, sdate, edate):
+def nav_history(engine, code, ismonetary, sdate, edate):
 	tbl = "fund_nav_history"
-	pl.log(tbl + " start...")
+	# pl.log(tbl + " start...")
 	try:
-		df = tsf.get_nav_history(code, str(sdate), str(edate))
-		df['symbol'] = code
-		df.to_sql(tbl,engine,if_exists='append')
-		print
-		pl.log(tbl + " done")
+		df = ts.get_nav_history(code, ismonetary, str(sdate), str(edate))
+		if df is not None:
+			df['symbol'] = code
+			df.to_sql(tbl,engine,if_exists='append')
+		# print
+		# pl.log(tbl + " done")
 	except BaseException, e:
-		print
 		print e
-		pl.log(tbl + " error")
+		pl.log(tbl + " error for " + code)

@@ -9,48 +9,33 @@ import pyconfig as pc
 def history(engine, session, sdate, edate):
 	codes = pu.get_stock_codes(session)
 	cnt = 0
-	dfh = pd.DataFrame()
-	dfb = pd.DataFrame()
 	for code in codes:
 		# pl.log("processs code : " + code)
 		try:
-			newdf = ts.get_k_data(code, start=str(sdate), end=str(edate))
-			dfh = dfh.append(newdf, ignore_index=True)
+			df = ts.get_k_data(code, start=str(sdate), end=str(edate))
+			df = df.set_index('code', drop='true')
+			df.to_sql('trade_market_history', engine, if_exists='append')
 		except BaseException, e:
 			print e
 			pl.log("trade_market_history error for %s" % code)
-		
+		'''
 		cdate = sdate
 		while cdate <= edate:
 			if not pu.is_holiday(cdate):
 				try:
-					newdf = ts.get_sina_dd(code, cdate, vol=10000)
-					dfb = dfb.append(newdf, ignore_index=True)
+					df = ts.get_sina_dd(code, cdate, vol=10000)
+					if df is not None:
+						df = df.set_index('code', drop='true')
+						df['date'] = cdate
+						df.to_sql('trade_block', engine, if_exists='append')
 				except BaseException, e:
 					print e
 					pl.log("trade_block error for %s on %s" % (code, str(cdate)))
 			cdate += datetime.timedelta(days=1)
+		'''
 		cnt += 1
 		if cnt % pc.TRADE_GC_NUM is 0:
-			dfh = dfh.set_index('code', drop='true')
-			dfh.to_sql('trade_market_history', engine, if_exists='append')
-			if dfb is not None:
-				dfb = dfb.set_index('code', drop='true')
-				dfb['date'] = cdate
-				dfb.to_sql('trade_block', engine, if_exists='append')
 			pl.log("process %i codes" % cnt)
-			del dfh
-			del dfb
-			gc.collect()
-			dfh = pd.DataFrame()
-			dfb = pd.DataFrame()
-	if dfh is not None:
-		dfh = dfh.set_index('code', drop='true')
-		dfh.to_sql('trade_market_history', engine, if_exists='append')
-	if dfb is not None:
-		dfb = dfb.set_index('code', drop='true')
-		dfb['date'] = cdate
-		dfb.to_sql('trade_block', engine, if_exists='append')
 
 def history_s(engine, session, code, year):
 	pl.log("get data for code : " + code + " year : " + year + " start...")
