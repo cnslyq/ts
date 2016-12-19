@@ -54,6 +54,14 @@ def history(engine, session, sdate, edate):
 			pl.log("process %i codes" % cnt)
 	pl.log(tbl + " done")
 
+def history_fund(engine, session, code):
+	pl.log("get data for code : " + code + " start...")
+	sdate = datetime.date(2013, 1, 1)
+	edate = datetime.date.today()
+	df = ts.get_nav_history(code, start=str(sdate), end=str(edate))
+	df.to_csv('/home/data/f_' + code + '.csv')
+	pl.log("get data for code : " + code + " done")
+
 def temp_info(engine, codes):
 	tbl = "fund_temp_info"
 	temp = []

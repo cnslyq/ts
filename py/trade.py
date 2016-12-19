@@ -37,13 +37,13 @@ def history(engine, session, sdate, edate):
 		if cnt % pc.TRADE_GC_NUM is 0:
 			pl.log("process %i codes" % cnt)
 
-def history_s(engine, session, code, year):
-	pl.log("get data for code : " + code + " year : " + year + " start...")
-	sdate = datetime.date(int(year), 1, 1)
-	edate = datetime.date(int(year), 12, 31)
+def history_stock(engine, session, code):
+	pl.log("get data for code : " + code + " start...")
+	sdate = datetime.date(2013, 1, 1)
+	edate = datetime.date.today()
 	df = ts.get_k_data(code, start=str(sdate), end=str(edate))
-	df.to_csv('/home/data/' + code + '_' + year + '.csv',columns=['date','open','close','high','low','volume'])
-	pl.log("get data for code : " + code + " year : " + year + " done")
+	df.to_csv('/home/data/s_' + code + '.csv',columns=['date','open','close','high','low','volume'])
+	pl.log("get data for code : " + code + " done")
 
 def daily(engine, session, cdate):
 	if not pu.is_holiday(cdate):
