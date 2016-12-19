@@ -166,10 +166,12 @@ def forecast(engine, year, quarter):
 	pl.log(tbl + " start...")
 	try:
 		df = ts.forecast_data(year, quarter)
-		df['year'] = year
-		df['quarter'] = quarter
-		df = df.set_index('code', drop='true')
-		df.to_sql(tbl,engine,if_exists='replace')
+		if len(df) != 0:
+			df['year'] = year
+			df['quarter'] = quarter
+			# df = df.set_index('code', drop='true')
+			df = df.reset_index()
+			df.to_sql(tbl,engine,if_exists='replace')
 		print
 		pl.log(tbl + " done")
 	except BaseException, e:
