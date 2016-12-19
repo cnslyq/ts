@@ -176,7 +176,7 @@ def get_nav_grading(fund_type='all', sub_type='all'):
     return fund_df
 
 
-def get_nav_history(code, start=None, end=None, retry_count=3, pause=0.001, timeout=10):
+def get_nav_history(code, ismonetary=None, start=None, end=None, retry_count=3, pause=0.001, timeout=10):
     '''
     获取历史净值数据
     Parameters
@@ -205,14 +205,15 @@ def get_nav_history(code, start=None, end=None, retry_count=3, pause=0.001, time
     end = du.today() if end is None else end
 
     # 判断基金类型
-    ismonetary = False  # 是否是债券型和货币型基金
-    df_fund = get_fund_info(code)
+    if ismonetary is None:
+        ismonetary = False  # 是否是债券型和货币型基金
+        df_fund = get_fund_info(code)
 
-    fund_type = df_fund.ix[0]['Type2Name']
-    if (fund_type.find(u'债券型') != -1) or (fund_type.find(u'货币型') != -1):
-        ismonetary = True
+        fund_type = df_fund.ix[0]['Type2Name']
+        if (fund_type.find(u'债券型') != -1) or (fund_type.find(u'货币型') != -1):
+            ismonetary = True
 
-    ct._write_head()
+    # ct._write_head()
     nums = _get_nav_histroy_num(code, start, end, ismonetary)
     data = _parse_nav_history_data(
         code, start, end, nums, ismonetary, retry_count, pause, timeout)
@@ -325,7 +326,7 @@ def _get_nav_histroy_num(code, start, end, ismonetary=False):
         货币和证券型基金采用的url不同，需要增加基金类型判断
     """
 
-    ct._write_console()
+    # ct._write_console()
 
     if ismonetary:
         request = Request(ct.SINA_NAV_HISTROY_COUNT_CUR_URL %
@@ -355,7 +356,7 @@ def _parse_nav_history_data(code, start, end, nums, ismonetary=False, retry_coun
     for _ in range(retry_count):
         time.sleep(pause)
         # try:
-        ct._write_console()
+        # ct._write_console()
 
         if ismonetary:
             request = Request(ct.SINA_NAV_HISTROY_DATA_CUR_URL %
