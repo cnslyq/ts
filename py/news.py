@@ -2,6 +2,7 @@ import tushare as ts
 import pylog as pl
 import pyutil as pu
 import datetime
+import traceback
 
 def real(engine, session):
 	news_real(engine)
@@ -50,7 +51,13 @@ def news_real(engine):
 		df['content'] = ''
 		urls = df.url.values
 		for i in range(len(df)):
-			df['content'][i] = ts.latest_content(urls[i])
+			print i
+			content = ts.latest_content(urls[i])
+			if content is not None:
+				content = content.encode('raw_unicode_escape').decode('utf8')
+				# print content
+				df['content'][i] = content
+		print df.head()
 		df = df.sort_values('time')
 		df = df.set_index('time', drop='true')
 		df.to_sql(tbl,engine,if_exists='append')
@@ -58,3 +65,4 @@ def news_real(engine):
 	except BaseException, e:
 		print e
 		pl.log(tbl + " error")
+		traceback.print_exc()
