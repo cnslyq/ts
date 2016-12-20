@@ -21,12 +21,18 @@ def daily(engine, session, cdate):
 				df['code'] = code
 				df['content'] = ''
 				urls = df.url.values
+				contents = ['' for i in range(len(df))]
 				titles = df.title.values
 				types = df.type.values
 				for i in range(len(df)):
-					df['content'][i] = ts.notice_content(urls[i]).encode('utf8')
-					df['title'][i] = titles[i].encode('utf8')
-					df['type'][i] = types[i].encode('utf8')
+					content = ts.notice_content(urls[i])
+					if content is not None:
+						contents[i] = content.encode('utf8')
+					titles[i] = titles[i].encode('utf8')
+					types[i] = types[i].encode('utf8')
+				df['content'] = contents
+				df['title'] = titles
+				df['type'] = types
 				df = df.set_index('date', drop='true')
 				df.to_sql(tbl,engine,if_exists='append')
 		except BaseException, e:

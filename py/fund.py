@@ -31,8 +31,9 @@ def init(engine, session):
 	
 def daily(engine, session, cdate):
 	nav_open(engine, cdate)
-	nav_close(engine, cdate)
-	nav_grading(engine, cdate)
+	ddate = cdate - datetime.timedelta(days=1)
+	nav_close(engine, ddate)
+	nav_grading(engine, ddate)
 
 def monthly(engine, session, year, month):
 	sdate=datetime.date(year, month, 1)
