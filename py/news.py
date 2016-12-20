@@ -40,29 +40,32 @@ def daily(engine, session, cdate):
 def news_real(engine):
 	tbl = "news_real"
 	pl.log(tbl + " start...")
-	try:
-		df = ts.get_latest_news()
-		st = datetime.datetime.today()
-		et = st - datetime.timedelta(hours=2)
-		st = '%i-%i %02i:00' % (st.month, st.day, st.hour)
-		et = '%i-%i %02i:00' % (et.month, et.day, et.hour)
-		df = df[df.time >= et]
-		df = df[df.time < st]
-		df['content'] = ''
-		urls = df.url.values
-		for i in range(len(df)):
-			print i
-			content = ts.latest_content(urls[i])
-			if content is not None:
-				content = content.encode('raw_unicode_escape').decode('utf8')
-				# print content
-				df['content'][i] = content
-		print df.head()
-		df = df.sort_values('time')
-		df = df.set_index('time', drop='true')
-		df.to_sql(tbl,engine,if_exists='append')
-		pl.log(tbl + " done")
-	except BaseException, e:
-		print e
-		pl.log(tbl + " error")
-		traceback.print_exc()
+	df = ts.get_latest_news()
+	st = datetime.datetime.today()
+	et = st - datetime.timedelta(hours=2)
+	st = '%i-%i %02i:00' % (st.month, st.day, st.hour)
+	et = '%i-%i %02i:00' % (et.month, et.day, et.hour)
+	df = df[df.time >= et]
+	df = df[df.time < st]
+	urls = df.url.values
+	contents = ['' for i in range(len(df))]
+	for i in range(len(df)):
+		if 'blog.sina.com.cn' in urls[i]:
+			continue
+		content = ts.latest_content(urls[i])
+		if content is not None:
+			try:
+				contents[i] = content.encode('raw_unicode_escape').decode('utf8')
+			# except UnicodeDecodeError:
+			# 	pass
+			except BaseException, e:
+				# print e
+				# pl.log(tbl + " error for " + urls[i])
+				print i
+				print urls[i]
+				traceback.print_exc()
+	df['content'] = contents
+	df = df.sort_values('time')
+	df = df.set_index('time', drop='true')
+	df.to_sql(tbl,engine,if_exists='append')
+	pl.log(tbl + " done")

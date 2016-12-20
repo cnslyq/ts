@@ -1,3 +1,4 @@
+/*
 drop table if exists invest_forecast;
 create table invest_forecast(
 	`id` bigint(20) primary key not null auto_increment,
@@ -13,7 +14,7 @@ create table invest_forecast(
 ) ENGINE=InnoDB;
 alter table invest_forecast add index invest_forecast_date_idx (`year`, `quarter`);
 alter table invest_forecast add index invest_forecast_code_idx (`code`);
-
+*/
 drop table if exists invest_forecast_history;
 create table invest_forecast_history(
 	`id` bigint(20) primary key not null auto_increment,

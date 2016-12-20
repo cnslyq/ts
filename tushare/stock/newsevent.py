@@ -84,6 +84,9 @@ def latest_content(url):
         else:
             sarr = [etree.tostring(node) for node in res]
         sarr = ''.join(sarr).replace('&#12288;', '')#.replace('\n\n', '\n').
+        # sarr = ''.join(sarr).replace('&#160;', '')#0xa0->&#160;-> (space)
+        # sarr = ''.join(sarr).replace('&#183;', '')#0xb7->&#183;->·
+        # sarr = ''.join(sarr).replace('&#252;', '')#0xfc->&#252;->ü
         html_content = lxml.html.fromstring(sarr)
         content = html_content.text_content()
         return content
