@@ -55,7 +55,7 @@ def news_real(engine):
 		content = ts.latest_content(urls[i])
 		if content is not None:
 			try:
-				contents[i] = content.encode('raw_unicode_escape').decode('utf8')
+				contents[i] = content.encode('raw_unicode_escape')#.decode('utf8')
 			# except UnicodeDecodeError:
 			# 	pass
 			except BaseException, e:

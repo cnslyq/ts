@@ -83,10 +83,7 @@ def latest_content(url):
             sarr = [etree.tostring(node).decode('utf-8') for node in res]
         else:
             sarr = [etree.tostring(node) for node in res]
-        sarr = ''.join(sarr).replace('&#12288;', '')#.replace('\n\n', '\n').
-        # sarr = ''.join(sarr).replace('&#160;', '')#0xa0->&#160;-> (space)
-        # sarr = ''.join(sarr).replace('&#183;', '')#0xb7->&#183;->·
-        # sarr = ''.join(sarr).replace('&#252;', '')#0xfc->&#252;->ü
+        sarr = ''.join(sarr).replace('&#12288;', '').replace('&#160;', '').replace('&#183;', '').replace('&#252;', '')#.replace('\n\n', '\n').
         html_content = lxml.html.fromstring(sarr)
         content = html_content.text_content()
         return content
@@ -203,7 +200,7 @@ def _guba_content(url):
             sarr = [etree.tostring(node).decode('utf-8') for node in res]
         else:
             sarr = [etree.tostring(node) for node in res]
-        sarr = ''.join(sarr).replace('&#12288;', '')#.replace('\n\n', '\n').
+        sarr = ''.join(sarr).replace('&#12288;', '').replace('&#160;', '').replace('&#183;', '').replace('&#252;', '')#.replace('\n\n', '\n').
         html_content = lxml.html.fromstring(sarr)
         content = html_content.text_content()
         ptime = html.xpath('//div[@class=\"fl_left iltp_time\"]/span/text()')[0]
