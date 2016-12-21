@@ -76,8 +76,12 @@ def latest_content(url):
     --------
         string:返回新闻的文字内容
     '''
+    from pandas.io.common import urlopen
     try:
-        html = lxml.html.parse(url)
+        # html = lxml.html.parse(url)
+        with urlopen(url) as resp:
+            lines = resp.read().decode('utf8')
+        html = lxml.html.document_fromstring(lines)
         res = html.xpath('//div[@id=\"artibody\"]/p')
         if ct.PY3:
             sarr = [etree.tostring(node).decode('utf-8') for node in res]
