@@ -203,6 +203,7 @@ def guba_sina(show_content=False):
         df['rcounts'] = df['rcounts'].astype(float)
         return df if show_content is True else df.drop('content', axis=1)
     except Exception as er:
+        print url
         print(str(er))  
     
     
@@ -210,6 +211,8 @@ def _guba_content(url):
     try:
         html = lxml.html.parse(url)
         res = html.xpath('//div[@class=\"ilt_p\"]/p')
+        if len(res) is 0:
+            return ['', '', '0']
         if ct.PY3:
             sarr = [etree.tostring(node).decode('utf-8') for node in res]
         else:
