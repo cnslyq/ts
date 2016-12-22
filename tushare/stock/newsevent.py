@@ -92,10 +92,11 @@ def latest_content(url):
         content = html_content.text_content()
         return content
     except Exception as er:
+        print url
         print(str(er))  
 
 
-def get_notices(code=None, date=None):
+def get_notices(code=None, date=None, show_content=False):
     '''
     个股信息地雷
     Parameters
@@ -122,11 +123,18 @@ def get_notices(code=None, date=None):
     data = []
     for td in res:
         if len(td.xpath('th/a/text()')) != 0:
-            title = td.xpath('th/a/text()')[0]
-            type = td.xpath('td[1]/text()')[0]
+            # title = td.xpath('th/a/text()')[0]
+            # type = td.xpath('td[1]/text()')[0]
+            title = td.xpath('th/a/text()')[0].encode('utf8')
+            type = td.xpath('td[1]/text()')[0].encode('utf8')
             date = td.xpath('td[2]/text()')[0]
             url = '%s%s%s'%(ct.P_TYPE['http'], ct.DOMAINS['vsf'], td.xpath('th/a/@href')[0])
-            data.append([title, type, date, url])
+            content = ''
+            if show_content:
+                content = notice_content(url)
+                if content is not None:
+                    content = content.encode('utf8')
+            data.append([title, type, date, url, content])
     if len(data) == 0:
         return None
     df = pd.DataFrame(data, columns=nv.NOTICE_INFO_CLS)
@@ -178,13 +186,15 @@ def guba_sina(show_content=False):
         heads = html.xpath('//div[@class=\"tit_04\"]')
         data = []
         for head in heads[:1]:
-            title = head.xpath('a/text()')[0]
+            # title = head.xpath('a/text()')[0]
+            title = head.xpath('a/text()')[0].encode('raw_unicode_escape').decode('gb2312')
             url = head.xpath('a/@href')[0]
             ds = [title]
             ds.extend(_guba_content(url))
             data.append(ds)
         for row in res:
-            title = row.xpath('a[2]/text()')[0]
+            # title = row.xpath('a[2]/text()')[0]
+            title = row.xpath('a[2]/text()')[0].encode('raw_unicode_escape').decode('gb2312')
             url = row.xpath('a[2]/@href')[0]
             ds = [title]
             ds.extend(_guba_content(url))

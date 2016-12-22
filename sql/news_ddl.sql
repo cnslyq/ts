@@ -28,7 +28,7 @@ create table news_sina_bar(
 	`id` bigint(20) primary key not null auto_increment,
 	`title` varchar(128),
 	`content` mediumtext,
-	`ptime` timestamp,
+	`ptime` date,
 	`recounts` int(8),
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
