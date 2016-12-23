@@ -5,14 +5,16 @@ import pyutil as pu
 import gc
 import pandas as pd
 import pyconfig as pc
+import multiprocessing
+import os
 
 def init(engine, session):
 	# get latest codes
 	pl.log("get latest codes start...")
 	codes = []
-	df = ts.get_nav_open().symbol.values
-	print
-	codes.extend([str(item) for item in df])
+	# df = ts.get_nav_open().symbol.values
+	# print
+	# codes.extend([str(item) for item in df])
 	df = ts.get_nav_close().symbol.values
 	print
 	codes.extend([str(item) for item in df])
@@ -23,7 +25,9 @@ def init(engine, session):
 	# insert latest info into fund_temp_info
 	# rmcodes = ['37001B', '16162A', '16300L']
 	session.execute("delete from fund_temp_info")
-	temp_info(engine, codes)
+	# temp_info(engine, codes)
+	print len(codes)
+	temp_info_mult(engine, codes)
 	# update fund_temp_info to fund_info
 	pl.log("call update_fund_info start...")
 	session.execute('call update_fund_info')
@@ -90,6 +94,42 @@ def temp_info(engine, codes):
 	pl.log(tbl + " done")
 	if len(temp) != 0:
 		temp_info(engine, temp)
+
+def temp_info_mult(engine, codes):
+	pl.log("fund_temp_info start...")
+	lock = multiprocessing.Lock()
+	pn = len(codes) / pc.FUND_GC_NUM + 1
+	for i in range(pn):
+		temp = codes[pc.FUND_GC_NUM * 1: pc.FUND_GC_NUM * (i+1)]
+		p = multiprocessing.Process(target = temp_info_worker, args=(engine, temp, lock))
+		p.daemon = True
+		p.start()
+		p.join()
+	pl.log("fund_temp_info done")
+	
+def temp_info_worker(engine, codes, lock):
+	pl.log("process %i start..." % os.getpid())
+	temp = []
+	df = pd.DataFrame()
+	for code in codes:
+		try:
+			newdf = ts.get_fund_info(code)
+			df = df.append(newdf, ignore_index=True)
+		except BaseException, e:
+			print e
+			pl.log(tbl + " error for " + code)
+			if 'timed out' in str(e):
+				temp.append(code)
+	if df is not None:
+		lock.acquire()
+		with lock:
+			df.to_sql('fund_temp_info',engine,if_exists='append')
+	if len(temp) != 0:
+		p = multiprocessing.Process(target = temp_info_worker, args=(engine, temp, lock))
+		p.daemon = True
+		p.start()
+		p.join()
+	pl.log("process %i done" % os.getpid())
 
 def nav_open(engine, cdate):
 	tbl = "fund_nav_open"
