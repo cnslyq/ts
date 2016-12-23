@@ -12,9 +12,9 @@ def init(engine, session):
 	# get latest codes
 	pl.log("get latest codes start...")
 	codes = []
-	# df = ts.get_nav_open().symbol.values
-	# print
-	# codes.extend([str(item) for item in df])
+	df = ts.get_nav_open().symbol.values
+	print
+	codes.extend([str(item) for item in df])
 	df = ts.get_nav_close().symbol.values
 	print
 	codes.extend([str(item) for item in df])
@@ -25,8 +25,7 @@ def init(engine, session):
 	# insert latest info into fund_temp_info
 	# rmcodes = ['37001B', '16162A', '16300L']
 	session.execute("delete from fund_temp_info")
-	# temp_info(engine, codes)
-	print len(codes)
+	print("total %i codes" % len(codes))
 	temp_info_mult(engine, codes)
 	# update fund_temp_info to fund_info
 	pl.log("call update_fund_info start...")
@@ -67,42 +66,13 @@ def history_fund(engine, session, code):
 	df.to_csv('/home/data/f_' + code + '.csv')
 	pl.log("get data for code : " + code + " done")
 
-def temp_info(engine, codes):
-	tbl = "fund_temp_info"
-	temp = []
-	pl.log(tbl + " start...")
-	cnt = 0
-	df = pd.DataFrame()
-	for code in codes:
-		try:
-			newdf = ts.get_fund_info(code)
-			df = df.append(newdf, ignore_index=True)
-		except BaseException, e:
-			print e
-			pl.log(tbl + " error for " + code)
-			if 'timed out' in str(e):
-				temp.append(code)
-		cnt += 1
-		if cnt % pc.FUND_GC_NUM is 0:
-			pl.log("process %i codes" % cnt)
-			df.to_sql(tbl,engine,if_exists='append')
-			del df
-			gc.collect()
-			df = pd.DataFrame()
-	if df is not None:
-		df.to_sql(tbl,engine,if_exists='append')
-	pl.log(tbl + " done")
-	if len(temp) != 0:
-		temp_info(engine, temp)
-
 def temp_info_mult(engine, codes):
 	pl.log("fund_temp_info start...")
-	lock = multiprocessing.Lock()
 	pn = len(codes) / pc.FUND_GC_NUM + 1
 	ps = []
 	for i in range(pn):
-		temp = codes[pc.FUND_GC_NUM * 1: pc.FUND_GC_NUM * (i+1)]
-		p = multiprocessing.Process(target = temp_info_worker, args=(engine, temp, lock))
+		temp = codes[pc.FUND_GC_NUM * i: pc.FUND_GC_NUM * (i+1)]
+		p = multiprocessing.Process(target = temp_info_worker, args=(engine, temp))
 		p.daemon = True
 		p.start()
 		ps.append(p)
@@ -110,8 +80,9 @@ def temp_info_mult(engine, codes):
 		p.join()
 	pl.log("fund_temp_info done")
 	
-def temp_info_worker(engine, codes, lock):
-	pl.log("process %i start..." % os.getpid())
+def temp_info_worker(engine, codes):
+	pid = os.getpid()
+	pl.log("pid %i start with %i codes..." % (pid, len(codes)))
 	temp = []
 	df = pd.DataFrame()
 	for code in codes:
@@ -119,17 +90,17 @@ def temp_info_worker(engine, codes, lock):
 			newdf = ts.get_fund_info(code)
 			df = df.append(newdf, ignore_index=True)
 		except BaseException, e:
-			print e
-			pl.log(tbl + " error for " + code)
-			if 'timed out' in str(e):
+			if 'timed out' in str(e) or 'urlopen error' in str(e):
 				temp.append(code)
+			else:
+				print e
+				pl.log("pid %i error for %s" % (pid, code))
 	if df is not None:
-		lock.acquire()
-		with lock:
-			df.to_sql('fund_temp_info',engine,if_exists='append')
+		df['pid'] = pid
+		df.to_sql('fund_temp_info',engine,if_exists='append')
 	if len(temp) != 0:
-		temp_info_worker(engine, codes, lock)
-	pl.log("process %i done" % os.getpid())
+		temp_info_worker(engine, temp)
+	pl.log("pid %i done with %i codes" % (pid, len(codes)))
 
 def nav_open(engine, cdate):
 	tbl = "fund_nav_open"

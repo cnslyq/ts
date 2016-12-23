@@ -74,10 +74,10 @@ drop table if exists fund_info;
 create table fund_info(
 	`id` bigint(20) primary key not null auto_increment,
 	`symbol` varchar(8),
-	`jjqc` varchar(32),
-	`jjjc` varchar(16),
+	`jjqc` varchar(64),
+	`jjjc` varchar(64),
 	`clrq` date,
-	`ssrq` date,
+	`ssrq` varchar(16),
 	`xcr` varchar(32),
 	`ssdd` varchar(32),
 	`type1` int(8),
