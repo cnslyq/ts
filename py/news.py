@@ -9,7 +9,7 @@ def real(engine, session):
 	
 def daily(engine, session, cdate):
 	news_notices(engine, session, cdate)
-	# news_guba(engine)
+	news_sina_bar(engine)
 	
 def news_real(engine):
 	tbl = "news_real"
@@ -29,7 +29,7 @@ def news_real(engine):
 		content = ts.latest_content(urls[i])
 		if content is not None:
 			try:
-				contents[i] = content.encode('raw_unicode_escape').decode('utf8')
+				contents[i] = unicode(content)#.encode('raw_unicode_escape').decode('utf8')
 			except BaseException, e:
 				print i
 				print urls[i]

@@ -187,14 +187,14 @@ def guba_sina(show_content=False):
         data = []
         for head in heads[:1]:
             # title = head.xpath('a/text()')[0]
-            title = head.xpath('a/text()')[0].encode('raw_unicode_escape').decode('gb2312')
+            title = head.xpath('a/text()')[0].encode('raw_unicode_escape').decode('GBK')
             url = head.xpath('a/@href')[0]
             ds = [title]
             ds.extend(_guba_content(url))
             data.append(ds)
         for row in res:
             # title = row.xpath('a[2]/text()')[0]
-            title = row.xpath('a[2]/text()')[0].encode('raw_unicode_escape').decode('gb2312')
+            title = row.xpath('a[2]/text()')[0].encode('raw_unicode_escape').decode('GBK')
             url = row.xpath('a[2]/@href')[0]
             ds = [title]
             ds.extend(_guba_content(url))
@@ -208,8 +208,12 @@ def guba_sina(show_content=False):
     
     
 def _guba_content(url):
+    from pandas.io.common import urlopen
     try:
-        html = lxml.html.parse(url)
+        # html = lxml.html.parse(url)
+        with urlopen(url) as resp:
+            lines = resp.read().decode('GBK')
+        html = lxml.html.fromstring(lines)
         res = html.xpath('//div[@class=\"ilt_p\"]/p')
         if len(res) is 0:
             return ['', '', '0']
@@ -224,8 +228,10 @@ def _guba_content(url):
         rcounts = html.xpath('//div[@class=\"fl_right iltp_span\"]/span[2]/text()')[0]
         reg = re.compile(r'\((.*?)\)') 
         rcounts = reg.findall(rcounts)[0]
-        return [content, ptime, rcounts]
-    except Exception:
+        return [unicode(content), unicode(ptime), rcounts]
+    except Exception, e:
+        print url
+        print e
         return ['', '', '0']
 
 

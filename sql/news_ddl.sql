@@ -28,8 +28,8 @@ create table news_sina_bar(
 	`id` bigint(20) primary key not null auto_increment,
 	`title` varchar(128),
 	`content` mediumtext,
-	`ptime` date,
-	`recounts` int(8),
+	`ptime` varchar(32),
+	`rcounts` int(8),
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 alter table news_sina_bar add index news_sina_bar_date_idx (`ptime`);
