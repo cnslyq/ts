@@ -99,11 +99,14 @@ def temp_info_mult(engine, codes):
 	pl.log("fund_temp_info start...")
 	lock = multiprocessing.Lock()
 	pn = len(codes) / pc.FUND_GC_NUM + 1
+	ps = []
 	for i in range(pn):
 		temp = codes[pc.FUND_GC_NUM * 1: pc.FUND_GC_NUM * (i+1)]
 		p = multiprocessing.Process(target = temp_info_worker, args=(engine, temp, lock))
 		p.daemon = True
 		p.start()
+		ps.append(p)
+	for p in ps:
 		p.join()
 	pl.log("fund_temp_info done")
 	
@@ -125,10 +128,7 @@ def temp_info_worker(engine, codes, lock):
 		with lock:
 			df.to_sql('fund_temp_info',engine,if_exists='append')
 	if len(temp) != 0:
-		p = multiprocessing.Process(target = temp_info_worker, args=(engine, temp, lock))
-		p.daemon = True
-		p.start()
-		p.join()
+		temp_info_worker(engine, codes, lock)
 	pl.log("process %i done" % os.getpid())
 
 def nav_open(engine, cdate):
