@@ -1,18 +1,19 @@
 from sqlalchemy import text
 import datetime
 
-def get_stock_codes(session, vip=False):
-	sql = "select code from stock_info"
-	if(vip):
-		sql += " where is_hs300 = 1 or is_sz50 = 1 or is_zz500 = 1"
-	codes = session.query("code").from_statement(text(sql)).all()
-	codes = (item[0].encode('utf8') for item in codes)
-	return codes
+stockcodes = None
+def get_stock_codes(session):
+	global stockcodes
+	if stockcodes is None:
+		sql = "select code from stock_info"
+		stockcodes = session.query("code").from_statement(text(sql)).all()
+		stockcodes = [item[0].encode('utf8') for item in stockcodes]
+	return stockcodes
 
 def get_fund_codes(session):
-	sql = "select symbol, type2 in (4002, 4003) as ismonetary from fund_info"
+	sql = "select symbol, IFNULL(type2 in (4002, 4003), 0) as ismonetary from fund_info"
 	codes = session.query("symbol", "ismonetary").from_statement(text(sql)).all()
-	codes = {item[0].encode('utf8'):item[1] for item in codes}
+	codes = [[item[0].encode('utf8'),item[1]] for item in codes]
 	return codes
 
 holiday =  ('2013-01-01', '2013-01-02', '2013-01-03', '2013-02-11', '2013-02-12', 

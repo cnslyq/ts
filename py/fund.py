@@ -2,7 +2,6 @@ import tushare as ts
 import datetime
 import pylog as pl
 import pyutil as pu
-import gc
 import pandas as pd
 import pyconfig as pc
 import multiprocessing
@@ -47,17 +46,47 @@ def quarterly(engine, session, year, quarterly):
 	init(engine, session)
 	
 def history(engine, session, sdate, edate):
+	codes = pu.get_fund_codes(session)
+	fund_nav_history_mult(engine, codes, str(sdate), str(edate))
+
+def fund_nav_history_mult(engine, codes, sdate, edate):
 	tbl = "fund_nav_history"
 	pl.log(tbl + " start...")
-	codes = pu.get_fund_codes(session)
-	cnt = 0
-	for code in codes:
-		nav_history(engine, code, codes[code], sdate, edate)
-		cnt += 1
-		if cnt % pc.FUND_GC_NUM is 0:
-			pl.log("process %i codes" % cnt)
+	pn = len(codes) / pc.FUND_PROCESS_NUM + 1
+	ps = []
+	for i in range(pn):
+		temp = codes[pc.FUND_PROCESS_NUM * i : pc.FUND_PROCESS_NUM * (i + 1)]
+		p = multiprocessing.Process(target = fund_nav_history_worker, args=(engine, temp, sdate, edate))
+		p.daemon = True
+		p.start()
+		ps.append(p)
+	for p in ps:
+		p.join()
 	pl.log(tbl + " done")
-
+	
+def fund_nav_history_worker(engine, codes, sdate, edate):
+	pid = os.getpid()
+	pl.log("pid %i start with %i codes..." % (pid, len(codes)))
+	temp = []
+	df = pd.DataFrame()
+	for code in codes:
+		try:
+			newdf = ts.get_nav_history(code[0], code[1], sdate, edate)
+			if newdf is not None:
+				newdf['symbol'] = code[0]
+				df = df.append(newdf)
+		except BaseException, e:
+			if 'timed out' in str(e) or 'urlopen error' in str(e):
+				temp.append(code)
+			else:
+				print e
+				pl.log("pid %i error for %s" % (pid, code))
+	if len(df) != 0:
+		df.to_sql('fund_nav_history',engine,if_exists='append')
+	if len(temp) != 0:
+		fund_nav_history_worker(engine, temp, sdate, edate)
+	pl.log("pid %i done with %i codes" % (pid, len(codes)))
+	
 def history_fund(engine, session, code):
 	pl.log("get data for code : " + code + " start...")
 	sdate = datetime.date(2013, 1, 1)
@@ -68,10 +97,10 @@ def history_fund(engine, session, code):
 
 def temp_info_mult(engine, codes):
 	pl.log("fund_temp_info start...")
-	pn = len(codes) / pc.FUND_GC_NUM + 1
+	pn = len(codes) / pc.FUND_PROCESS_NUM + 1
 	ps = []
 	for i in range(pn):
-		temp = codes[pc.FUND_GC_NUM * i: pc.FUND_GC_NUM * (i+1)]
+		temp = codes[pc.FUND_PROCESS_NUM * i : pc.FUND_PROCESS_NUM * (i + 1)]
 		p = multiprocessing.Process(target = temp_info_worker, args=(engine, temp))
 		p.daemon = True
 		p.start()
@@ -95,7 +124,7 @@ def temp_info_worker(engine, codes):
 			else:
 				print e
 				pl.log("pid %i error for %s" % (pid, code))
-	if df is not None:
+	if len(df) != 0:
 		df['pid'] = pid
 		df.to_sql('fund_temp_info',engine,if_exists='append')
 	if len(temp) != 0:
@@ -146,17 +175,3 @@ def nav_grading(engine, cdate):
 		print
 		print e
 		pl.log(tbl + " error")
-
-def nav_history(engine, code, ismonetary, sdate, edate):
-	tbl = "fund_nav_history"
-	# pl.log(tbl + " start...")
-	try:
-		df = ts.get_nav_history(code, ismonetary, str(sdate), str(edate))
-		if df is not None:
-			df['symbol'] = code
-			df.to_sql(tbl,engine,if_exists='append')
-		# print
-		# pl.log(tbl + " done")
-	except BaseException, e:
-		print e
-		pl.log(tbl + " error for " + code)

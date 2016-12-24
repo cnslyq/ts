@@ -210,7 +210,7 @@ def get_nav_history(code, ismonetary=None, start=None, end=None, retry_count=3, 
         df_fund = get_fund_info(code)
 
         fund_type = df_fund.ix[0]['Type2Name']
-        if (fund_type.find(u'债券型') != -1) or (fund_type.find(u'货币型') != -1):
+        if fund_type is not None and ((fund_type.find(u'债券型') != -1) or (fund_type.find(u'货币型') != -1)):
             ismonetary = True
 
     # ct._write_head()
@@ -362,6 +362,7 @@ def _parse_nav_history_data(code, start, end, nums, ismonetary=False, retry_coun
             request = Request(ct.SINA_NAV_HISTROY_DATA_CUR_URL %
                               (ct.P_TYPE['http'], ct.DOMAINS['ssf'],
                                code, start, end, nums))
+
         else:
             request = Request(ct.SINA_NAV_HISTROY_DATA_URL %
                               (ct.P_TYPE['http'], ct.DOMAINS['ssf'],
@@ -376,7 +377,9 @@ def _parse_nav_history_data(code, start, end, nums, ismonetary=False, retry_coun
             raise ValueError(status)
 
         data = org_js['result']['data']['data']
-
+        if isinstance(data, dict):
+            data = data.values()
+        
         if 'jjjz' in data[0].keys():
             fund_df = pd.DataFrame(data, columns=ct.NAV_HIS_JJJZ)
             fund_df['jjjz'] = fund_df['jjjz'].astype(float)

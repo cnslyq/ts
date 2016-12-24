@@ -714,15 +714,15 @@ def top10_holders(code=None, year=None, quarter=None, gdtype='0',
             data = pd.DataFrame()
             for row in jss:
                 qt = row['jzrq']
-                hold = row['ljcy']
-                change = row['ljbh']
-                props = row['ljzb']
+                hold = row['ljcy'] if 'ljcy' in row else 0
+                change = row['ljbh'] if 'ljbh' in row else 0
+                props = row['ljzb'] if 'ljzb' in row else 0
                 arow = [qt, hold, change ,props]
                 summ.append(arow)
                 ls = row['sdgdList']
                 dlist = []
                 for inrow in ls:
-                    sharetype = inrow['gbxz']
+                    sharetype = inrow['gbxz'] if 'gbxz' in inrow else ''
                     name = inrow['gdmc']
                     hold = inrow['cgs']
                     h_pro = inrow['zzgs']
@@ -735,7 +735,7 @@ def top10_holders(code=None, year=None, quarter=None, gdtype='0',
                 df = df[df.quarter == qdate]
                 data = data[data.quarter == qdate]
         except Exception as e:
-            print(e)
+            raise e
         else:
             return df, data
     raise IOError(ct.NETWORK_URL_ERROR_MSG)

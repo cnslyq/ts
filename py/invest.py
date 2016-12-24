@@ -5,6 +5,8 @@ import pyutil as pu
 import gc
 import pandas as pd
 import pyconfig as pc
+import multiprocessing
+import os
 
 def history(engine, session, sdate, edate):
 	margin_sh_smry(engine, str(sdate), str(edate))
@@ -25,7 +27,7 @@ def history_q(engine, session, year, quarter):
 	fund_hold(engine, year, quarter)
 
 def history_a(engine, session):
-	top10_holders(engine, session)
+	top10_holders_mult(engine, session)
 
 def daily(engine, session, cdate):
 	ddate = cdate - datetime.timedelta(days=1)
@@ -49,35 +51,47 @@ def monthly(engine, session, year, month):
 	
 def quarterly(engine, session, year, quarter):
 	history_q(engine, session, year, quarter)
-	top10_holders(engine, session, year, quarter)
+	top10_holders_mult(engine, session, year, quarter)
 	
-def top10_holders(engine, session, year=None, quarter=None):
-	tbl = "invest_top10_holders"
-	pl.log(tbl + " start...")
+def top10_holders_mult(engine, session, year=None, quarter=None):
+	pl.log("invest_top10_holders start...")
 	codes = pu.get_stock_codes(session)
-	cnt = 0
+	pn = len(codes) / pc.INVEST_PROCESS_NUM + 1
+	ps = []
+	for i in range(pn):
+		temp = codes[pc.INVEST_PROCESS_NUM * i : pc.INVEST_PROCESS_NUM * (i + 1)]
+		p = multiprocessing.Process(target = top10_holders_worker, args=(engine, temp, year, quarter))
+		p.daemon = True
+		p.start()
+		ps.append(p)
+	for p in ps:
+		p.join()
+	pl.log("invest_top10_holders done")
+	
+def top10_holders_worker(engine, codes, year, quarter):
+	pid = os.getpid()
+	pl.log("pid %i start with %i codes..." % (pid, len(codes)))
 	df = pd.DataFrame()
+	temp = []
 	for code in codes:
 		try:
 			newdf = ts.top10_holders(code, year, quarter)[1]
-			newdf['code'] = code
-			df = df.append(newdf, ignore_index=True)
+			if newdf is not None:
+				newdf['code'] = code
+				df = df.append(newdf, ignore_index=True)
 		except BaseException, e:
-			print e
-			pl.log(tbl + " error for " + code)
-		cnt += 1
-		if cnt % pc.INVEST_GC_NUM is 0:
-			df = df.set_index('code', drop='true')
-			df.to_sql(tbl, engine, if_exists='append')
-			pl.log("process %i codes" % cnt)
-			del df
-			gc.collect()
-			df = pd.DataFrame()
-	if df is not None:
+			if 'timed out' in str(e) or 'urlopen error' in str(e):
+				temp.append(code)
+			else:
+				print e
+				pl.log("pid %i error for %s" % (pid, code))
+	if len(df) != 0:
 		df = df.set_index('code', drop='true')
-		df.to_sql(tbl, engine, if_exists='append')
-	pl.log(tbl + " done")
-
+		df.to_sql('invest_top10_holders',engine,if_exists='append')
+	if len(temp) != 0:
+		top10_holders_worker(engine, temp, year, quarter)
+	pl.log("pid %i done with %i codes" % (pid, len(codes)))
+	
 def margin_sh_smry(engine, sdate, edate):
 	tbl = "invest_margin_sh_smry"
 	pl.log(tbl + " start...")

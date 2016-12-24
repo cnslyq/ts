@@ -2,9 +2,10 @@ import tushare as ts
 import datetime
 import pylog as pl
 import pyutil as pu
-import gc
 import pandas as pd
 import pyconfig as pc
+import multiprocessing
+import os
 
 def history(engine, session, sdate, edate):
 	codes = pu.get_stock_codes(session)
@@ -18,24 +19,10 @@ def history(engine, session, sdate, edate):
 		except BaseException, e:
 			print e
 			pl.log("trade_market_history error for %s" % code)
-		'''
-		cdate = sdate
-		while cdate <= edate:
-			if not pu.is_holiday(cdate):
-				try:
-					df = ts.get_sina_dd(code, cdate, vol=10000)
-					if df is not None:
-						df = df.set_index('code', drop='true')
-						df['date'] = cdate
-						df.to_sql('trade_block', engine, if_exists='append')
-				except BaseException, e:
-					print e
-					pl.log("trade_block error for %s on %s" % (code, str(cdate)))
-			cdate += datetime.timedelta(days=1)
-		'''
 		cnt += 1
-		if cnt % pc.TRADE_GC_NUM is 0:
+		if cnt % pc.TRADE_PROCESS_NUM is 0:
 			pl.log("process %i codes" % cnt)
+	trade_block_mult(engine, codes, sdate, edate)
 
 def history_stock(engine, session, code):
 	pl.log("get data for code : " + code + " start...")
@@ -71,20 +58,49 @@ def daily(engine, session, cdate):
 			print e
 			pl.log("trade_market_today error")
 		
-		pl.log("trade_block start...")
 		codes = pu.get_stock_codes(session)
-		for code in codes:
-			try:
-				df = ts.get_sina_dd(code, cdate, vol=10000)
-				if df is not None:
-					df = df.set_index('code', drop='true')
-					df['date'] = cdate
-					df.to_sql('trade_block', engine, if_exists='append')
-			except BaseException, e:
-				print e
-				pl.log("trade_block error for " + code)
-		pl.log("trade_block done")
+		trade_block_mult(engine, codes, cdate, cdate)
 	else:
 		pl.log("today is a holiday")
 
-
+def trade_block_mult(engine, codes, sdate, edate):
+	pl.log("trade_block start...")
+	pn = len(codes) / pc.TRADE_PROCESS_NUM + 1
+	ps = []
+	for i in range(pn):
+		temp = codes[pc.TRADE_PROCESS_NUM * i : pc.TRADE_PROCESS_NUM * (i + 1)]
+		p = multiprocessing.Process(target = trade_block_worker, args=(engine, temp, sdate, edate))
+		p.daemon = True
+		p.start()
+		ps.append(p)
+	for p in ps:
+		p.join()
+	pl.log("trade_block done")
+	
+def trade_block_worker(engine, codes, sdate, edate):
+	pid = os.getpid()
+	pl.log("pid %i start with %i codes..." % (pid, len(codes)))
+	df = pd.DataFrame()
+	cdate = sdate
+	while cdate <= edate:
+		if not pu.is_holiday(cdate):
+			temp = []
+			for code in codes:
+				try:
+					newdf = ts.get_sina_dd(code, cdate, vol=10000)
+					if newdf is not None:
+						newdf['date'] = cdate
+						df = df.append(newdf, ignore_index=True)
+				except BaseException, e:
+					if 'timed out' in str(e) or 'urlopen error' in str(e):
+						temp.append(code)
+					else:
+						print e
+						pl.log("pid %i error for %s on %s" % (pid, code, str(cdate)))
+			if len(df) != 0:
+				df = df.set_index('code', drop='true')
+				df.to_sql('trade_block',engine,if_exists='append')
+			if len(temp) != 0:
+				trade_block_worker(engine, temp, cdate, cdate)
+			cdate += datetime.timedelta(days=1)
+	pl.log("pid %i done with %i codes" % (pid, len(codes)))
