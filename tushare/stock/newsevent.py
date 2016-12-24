@@ -16,6 +16,7 @@ import lxml.html
 from lxml import etree
 import re
 import json
+import time
 try:
     from urllib.request import urlopen, Request
 except ImportError:
@@ -65,7 +66,7 @@ def get_latest_news(top=None, show_content=False):
     except Exception as er:
         print(str(er))
 
-def latest_content(url):
+def latest_content(url, retry_count=10, pause=0.01):
     '''
         获取即时财经新闻内容
     Parameter
@@ -77,26 +78,28 @@ def latest_content(url):
         string:返回新闻的文字内容
     '''
     from pandas.io.common import urlopen
-    try:
-        # html = lxml.html.parse(url)
-        with urlopen(url) as resp:
-            lines = resp.read().decode('utf8')
-        html = lxml.html.document_fromstring(lines)
-        res = html.xpath('//div[@id=\"artibody\"]/p')
-        if ct.PY3:
-            sarr = [etree.tostring(node).decode('utf-8') for node in res]
-        else:
-            sarr = [etree.tostring(node) for node in res]
-        sarr = ''.join(sarr).replace('&#12288;', '').replace('&#160;', '').replace('&#183;', '').replace('&#252;', '')#.replace('\n\n', '\n').
-        html_content = lxml.html.fromstring(sarr)
-        content = html_content.text_content()
-        return content
-    except Exception as er:
-        print url
-        print(str(er))  
+    for _ in range(retry_count):
+        time.sleep(pause)
+        try:
+            # html = lxml.html.parse(url)
+            with urlopen(url) as resp:
+                lines = resp.read().decode('utf8')
+            html = lxml.html.document_fromstring(lines)
+            res = html.xpath('//div[@id=\"artibody\"]/p')
+            if ct.PY3:
+                sarr = [etree.tostring(node).decode('utf-8') for node in res]
+            else:
+                sarr = [etree.tostring(node) for node in res]
+            sarr = ''.join(sarr).replace('&#12288;', '').replace('&#160;', '').replace('&#183;', '').replace('&#252;', '')#.replace('\n\n', '\n').
+            html_content = lxml.html.fromstring(sarr)
+            content = html_content.text_content()
+            return content
+        except Exception as er:
+            print url
+            print(str(er))  
 
 
-def get_notices(code=None, date=None, show_content=False):
+def get_notices(code=None, date=None, show_content=False, retry_count=10, pause=0.01):
     '''
     个股信息地雷
     Parameters
@@ -112,33 +115,38 @@ def get_notices(code=None, date=None, show_content=False):
         date:公告日期
         url:信息内容URL
     '''
-    if code is None:
-        return None
-    symbol = 'sh' + code if code[:1] == '6' else 'sz' + code
-    url = nv.NOTICE_INFO_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'],
-                              ct.PAGES['ntinfo'], symbol)
-    url = url if date is None else '%s&gg_date=%s'%(url, date)
-    html = lxml.html.parse(url)
-    res = html.xpath('//table[@class=\"body_table\"]/tbody/tr')
-    data = []
-    for td in res:
-        if len(td.xpath('th/a/text()')) != 0:
-            # title = td.xpath('th/a/text()')[0]
-            # type = td.xpath('td[1]/text()')[0]
-            title = td.xpath('th/a/text()')[0].encode('utf8')
-            type = td.xpath('td[1]/text()')[0].encode('utf8')
-            date = td.xpath('td[2]/text()')[0]
-            url = '%s%s%s'%(ct.P_TYPE['http'], ct.DOMAINS['vsf'], td.xpath('th/a/@href')[0])
-            content = ''
-            if show_content:
-                content = notice_content(url)
-                if content is not None:
-                    content = content.encode('utf8')
-            data.append([title, type, date, url, content])
-    if len(data) == 0:
-        return None
-    df = pd.DataFrame(data, columns=nv.NOTICE_INFO_CLS)
-    return df
+    for _ in range(retry_count):
+        time.sleep(pause)
+        try:
+            if code is None:
+                return None
+            symbol = 'sh' + code if code[:1] == '6' else 'sz' + code
+            url = nv.NOTICE_INFO_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'],
+                                      ct.PAGES['ntinfo'], symbol)
+            url = url if date is None else '%s&gg_date=%s'%(url, date)
+            html = lxml.html.parse(url)
+            res = html.xpath('//table[@class=\"body_table\"]/tbody/tr')
+            data = []
+            for td in res:
+                if len(td.xpath('th/a/text()')) != 0:
+                    # title = td.xpath('th/a/text()')[0]
+                    # type = td.xpath('td[1]/text()')[0]
+                    title = td.xpath('th/a/text()')[0].encode('utf8')
+                    type = td.xpath('td[1]/text()')[0].encode('utf8')
+                    date = td.xpath('td[2]/text()')[0]
+                    url = '%s%s%s'%(ct.P_TYPE['http'], ct.DOMAINS['vsf'], td.xpath('th/a/@href')[0])
+                    content = ''
+                    if show_content:
+                        content = notice_content(url)
+                        if content is not None:
+                            content = content.encode('utf8')
+                    data.append([title, type, date, url, content])
+            if len(data) == 0:
+                return None
+            df = pd.DataFrame(data, columns=nv.NOTICE_INFO_CLS)
+            return df
+        except Exception as er:
+            print er
 
 
 def notice_content(url):
@@ -157,7 +165,7 @@ def notice_content(url):
         res = html.xpath('//div[@id=\"content\"]/pre/text()')[0]
         return res.strip()
     except Exception as er:
-        print(str(er))  
+        print er
 
 
 def guba_sina(show_content=False):
@@ -187,16 +195,22 @@ def guba_sina(show_content=False):
         data = []
         for head in heads[:1]:
             # title = head.xpath('a/text()')[0]
-            title = head.xpath('a/text()')[0].encode('raw_unicode_escape').decode('GBK')
+            title = unicode(head.xpath('a/text()')[0])
             url = head.xpath('a/@href')[0]
-            ds = [title]
+            if 'live' in url:
+                continue
+            ds = [title, url]
             ds.extend(_guba_content(url))
             data.append(ds)
         for row in res:
             # title = row.xpath('a[2]/text()')[0]
-            title = row.xpath('a[2]/text()')[0].encode('raw_unicode_escape').decode('GBK')
+            if len(row.xpath('a[2]/text()')) == 0:
+                continue
+            title = unicode(row.xpath('a[2]/text()')[0])
             url = row.xpath('a[2]/@href')[0]
-            ds = [title]
+            if 'live' in url:
+                continue
+            ds = [title, url]
             ds.extend(_guba_content(url))
             data.append(ds)
         df = pd.DataFrame(data, columns=nv.GUBA_SINA_COLS)

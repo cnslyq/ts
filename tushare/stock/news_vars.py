@@ -7,4 +7,5 @@ NOTICE_INFO_URL = '%s%s/corp/view/%s?stock_str=%s'
 # NOTICE_INFO_CLS = ['title', 'type', 'date', 'url']
 NOTICE_INFO_CLS = ['title', 'type', 'date', 'url', 'content']
 GUBA_SINA_URL = '%sguba.%s'
-GUBA_SINA_COLS = ['title', 'content', 'ptime', 'rcounts']
+# GUBA_SINA_COLS = ['title', 'content', 'ptime', 'rcounts']
+GUBA_SINA_COLS = ['title', 'url', 'content', 'ptime', 'rcounts']
