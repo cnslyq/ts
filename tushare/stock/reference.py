@@ -181,11 +181,18 @@ def forecast_data(year, quarter):
 
 
 def _get_forecast_data(year, quarter, pageNo, dataArr):
+    from pandas.io.common import urlopen
     ct._write_console()
     try:
+        '''
         html = lxml.html.parse(ct.FORECAST_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'], 
                                                 ct.PAGES['fd'], year, quarter, pageNo,
                                                 ct.PAGE_NUM[1]))
+        '''
+        url = ct.FORECAST_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'], ct.PAGES['fd'], year, quarter, pageNo, ct.PAGE_NUM[1])
+        with urlopen(url) as resp:
+            lines = resp.read().decode('gbk')
+        html = lxml.html.document_fromstring(lines)
         res = html.xpath("//table[@class=\"list_table\"]/tr")
         if ct.PY3:
             sarr = [etree.tostring(node).decode('utf-8') for node in res]
@@ -195,7 +202,7 @@ def _get_forecast_data(year, quarter, pageNo, dataArr):
         sarr = sarr.replace('--', '0')
         sarr = '<table>%s</table>'%sarr
         df = pd.read_html(sarr)[0]
-        if len(df.columns != 9):
+        if len(df.columns) != 9:
             return dataArr
         df = df.drop([4, 5, 8], axis=1)
         df.columns = ct.FORECAST_COLS

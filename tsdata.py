@@ -98,9 +98,9 @@ def cron(cdate = datetime.date.today()):
 	# process today's data
 	call('daily', cdate)
 	
-	# process last week's data every Monday(?)
-	if 1 == cdate.isoweekday():
-		call('weekly', cdate - datetime.timedelta(days=7))
+	# process week's data on Friday
+	if 5 == cdate.isoweekday():
+		call('weekly', cdate)
 	
 	# process last month's data on the 1st of each month
 	if 1 == cdate.day:

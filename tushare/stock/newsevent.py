@@ -96,7 +96,8 @@ def latest_content(url, retry_count=10, pause=0.01):
             return content
         except Exception as er:
             print url
-            print(str(er))  
+            print(str(er))
+    raise IOError(ct.NETWORK_URL_ERROR_MSG)
 
 
 def get_notices(code=None, date=None, show_content=False, retry_count=10, pause=0.01):
@@ -147,6 +148,7 @@ def get_notices(code=None, date=None, show_content=False, retry_count=10, pause=
             return df
         except Exception as er:
             print er
+    raise IOError(ct.NETWORK_URL_ERROR_MSG)
 
 
 def notice_content(url):

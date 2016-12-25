@@ -10,8 +10,7 @@ import os
 
 def history(engine, session, sdate, edate):
 	margin_sh_smry(engine, str(sdate), str(edate))
-	# no data, should be a bug
-	# margin_sh_dtl(engine, str(sdate), str(edate))
+	margin_sh_dtl(engine, str(sdate), str(edate))
 	margin_sz_smry(engine, str(sdate), str(edate))
 	cdate = sdate
 	while cdate <= edate:
@@ -34,8 +33,7 @@ def daily(engine, session, cdate):
 	if not pu.is_holiday(ddate):
 		ddate = str(ddate)
 		margin_sh_smry(engine, ddate, ddate)
-		# no data, should be a bug
-		# margin_sh_dtl(engine, ddate, ddate)
+		margin_sh_dtl(engine, ddate, ddate)
 		margin_sz_smry(engine, ddate, ddate)
 		margin_sz_dtl(engine, ddate)
 	else:
@@ -107,10 +105,10 @@ def margin_sh_smry(engine, sdate, edate):
 		pl.log(tbl + " error")
 
 def margin_sh_dtl(engine, sdate, edate):
-	tbl = invest_margin_sh_dtl
+	tbl = "invest_margin_sh_dtl"
 	pl.log(tbl + " start...")
 	try:
-		df = ts.sh_margin_details(sdate, edate)
+		df = ts.sh_margin_details(start=sdate, end=edate)
 		df = df.set_index('opDate', drop='true')
 		df.to_sql(tbl,engine,if_exists='append')
 		pl.log(tbl + " done")
