@@ -25,6 +25,9 @@ def history_q(engine, session, year, quarter):
 	forecast_history(engine, year, quarter)
 	fund_hold(engine, year, quarter)
 
+def history_y(engine, session, year):
+	profit(engine, year)
+	
 def history_a(engine, session):
 	top10_holders_mult(engine, session)
 
@@ -40,8 +43,8 @@ def daily(engine, session, cdate):
 		pl.log("yesterday is a holiday")
 	
 def weekly(engine, session, cdate):
-	today = datetime.date.today()
-	forecast(engine, today.year, (today.month - 1) / 3 + 1)
+	if 1 == cdate.isoweekday():
+		forecast(engine, cdate.year, (cdate.month - 1) / 3 + 1)
 	
 def monthly(engine, session, year, month):
 	lifted(engine, year, month)
@@ -50,6 +53,7 @@ def monthly(engine, session, year, month):
 def quarterly(engine, session, year, quarter):
 	history_q(engine, session, year, quarter)
 	top10_holders_mult(engine, session, year, quarter)
+	profit(engine, year, quarter)
 	
 def top10_holders_mult(engine, session, year=None, quarter=None):
 	pl.log("invest_top10_holders start...")
@@ -212,6 +216,24 @@ def fund_hold(engine, year, quarter):
 	pl.log(tbl + " start...")
 	try:
 		df = ts.fund_holdings(year, quarter)
+		df = df.set_index('code', drop='true')
+		df.to_sql(tbl,engine,if_exists='append')
+		print
+		pl.log(tbl + " done")
+	except BaseException, e:
+		print
+		print e
+		pl.log(tbl + " error")
+
+def profit(engine, year, quarter=None):
+	tbl = "invest_profit"
+	pl.log(tbl + " start...")
+	try:
+		df = ts.profit_data(year,'all')
+		if quarter is not None:
+			qd = pu.get_quarter_date(year, quarter)
+			df = df[df.report_date >= qd[0]]
+			df = df[df.report_date <= qd[1]]
 		df = df.set_index('code', drop='true')
 		df.to_sql(tbl,engine,if_exists='append')
 		print

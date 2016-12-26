@@ -20,9 +20,11 @@ def history(engine, session, sdate, edate):
 	pl.log("tops_list done")
 
 def weekly(engine, session, cdate):
-	tops(engine, 5)
-	sdate = cdate - datetime.timedelta(days=4)
-	edate = cdate
+	if 5 == cdate.isoweekday():
+		tops(engine, 5)
+	if 1 == cdate.isoweekday():
+		sdate = cdate - datetime.timedelta(days=7)
+		edate = cdate - datetime.timedelta(days=3)
 	history(engine, session, sdate, edate)
 
 def monthly(engine, session, year, month):

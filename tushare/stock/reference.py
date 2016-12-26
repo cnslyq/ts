@@ -115,13 +115,18 @@ def _fun_into(x):
     
     
 def _dist_cotent(year, pageNo, retry_count, pause):
+    from pandas.io.common import urlopen
     for _ in range(retry_count):
         time.sleep(pause)
         try:
             if pageNo > 0:
                 ct._write_console()
-            html = lxml.html.parse(rv.DP_163_URL%(ct.P_TYPE['http'], ct.DOMAINS['163'],
-                     ct.PAGES['163dp'], year, pageNo))  
+            # html = lxml.html.parse(rv.DP_163_URL%(ct.P_TYPE['http'], ct.DOMAINS['163'],
+            #          ct.PAGES['163dp'], year, pageNo))  
+            url = rv.DP_163_URL%(ct.P_TYPE['http'], ct.DOMAINS['163'], ct.PAGES['163dp'], year, pageNo)
+            with urlopen(url) as resp:
+                lines = resp.read().decode('utf8')
+            html=lxml.html.document_fromstring(lines)
             res = html.xpath('//div[@class=\"fn_rp_list\"]/table')
             if ct.PY3:
                 sarr = [etree.tostring(node).decode('utf-8') for node in res]

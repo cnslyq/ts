@@ -53,7 +53,10 @@ def get_ldate(date, diff):
 	ldate["quarter"] = ldate["month"] / 3 + 1
 	return ldate
 	
-
+def get_quarter_date(year, quarter):
+	sdt = {1: '-01-01', 2: '-04-01', 3: '-07-01', 4: '-10-01'}
+	edt = {1: '-03-31', 2: '-06-30', 3: '-09-30', 4: '-12-31'}
+	return ['%s%s'%(str(year), sdt[quarter]), '%s%s'%(str(year), edt[quarter])]
 '''
 import tushare as ts
 import pylog as pl

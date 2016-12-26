@@ -1,20 +1,16 @@
-/*
-drop table if exists invest_forecast;
-create table invest_forecast(
+drop table if exists invest_profit;
+create table invest_profit(
 	`id` bigint(20) primary key not null auto_increment,
-	`year` int(4),
-	`quarter` int(1),
 	`code` varchar(8),
 	`name` varchar(16),
-	`type` varchar(8),
+	`year` int(4),
 	`report_date` date,
-	`pre_eps` double,
-	`range` varchar(32),
+	`divi` double,
+	`shares` double,
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
-alter table invest_forecast add index invest_forecast_date_idx (`year`, `quarter`);
-alter table invest_forecast add index invest_forecast_code_idx (`code`);
-*/
+alter table invest_profit add index invest_profit_code_idx (`code`);
+
 drop table if exists invest_forecast_history;
 create table invest_forecast_history(
 	`id` bigint(20) primary key not null auto_increment,
@@ -31,7 +27,7 @@ create table invest_forecast_history(
 alter table invest_forecast_history add index invest_forecast_history_date_idx (`year`, `quarter`);
 alter table invest_forecast_history add index invest_forecast_history_code_idx (`code`);
 
-drop table if exists invest_lifted; 
+drop table if exists invest_lifted;
 create table invest_lifted(
 	`id` bigint(20) primary key not null auto_increment,
 	`date` date,
@@ -44,7 +40,7 @@ create table invest_lifted(
 alter table invest_lifted add index invest_lifted_date_idx (`date`);
 alter table invest_lifted add index invest_lifted_code_idx (`code`);
 
-drop table if exists invest_fund_hold; 
+drop table if exists invest_fund_hold;
 create table invest_fund_hold(
 	`id` bigint(20) primary key not null auto_increment,
 	`code` varchar(8),
