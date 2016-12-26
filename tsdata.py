@@ -99,7 +99,8 @@ def cron(cdate = datetime.date.today()):
 	call('daily', cdate)
 	
 	# process week's data
-	call('weekly', cdate)
+	if cdate.isoweekday() in (1, 5):
+		call('weekly', cdate)
 	
 	# process last month's data on the 1st of each month
 	if 1 == cdate.day:

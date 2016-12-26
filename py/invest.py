@@ -45,6 +45,8 @@ def daily(engine, session, cdate):
 def weekly(engine, session, cdate):
 	if 1 == cdate.isoweekday():
 		forecast(engine, cdate.year, (cdate.month - 1) / 3 + 1)
+	else:
+		pl.log("no weekly task for module : invest")
 	
 def monthly(engine, session, year, month):
 	lifted(engine, year, month)

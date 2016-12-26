@@ -22,10 +22,12 @@ def history(engine, session, sdate, edate):
 def weekly(engine, session, cdate):
 	if 5 == cdate.isoweekday():
 		tops(engine, 5)
-	if 1 == cdate.isoweekday():
+	elif 1 == cdate.isoweekday():
 		sdate = cdate - datetime.timedelta(days=7)
 		edate = cdate - datetime.timedelta(days=3)
-	history(engine, session, sdate, edate)
+		history(engine, session, sdate, edate)
+	else:
+		pl.log("no weekly task for module : tops")
 
 def monthly(engine, session, year, month):
 	tops(engine, 30)
