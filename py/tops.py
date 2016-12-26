@@ -20,10 +20,9 @@ def history(engine, session, sdate, edate):
 	pl.log("tops_list done")
 
 def weekly(engine, session, cdate):
-	# TBD need to confirm the execution date
-	# tops(engine, 5)
-	sdate = cdate
-	edate = cdate + datetime.timedelta(days=4)
+	tops(engine, 5)
+	sdate = cdate - datetime.timedelta(days=4)
+	edate = cdate
 	history(engine, session, sdate, edate)
 
 def monthly(engine, session, year, month):
