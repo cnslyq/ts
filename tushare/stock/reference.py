@@ -405,7 +405,7 @@ def _newstocks(data, pageNo, retry_count, pause):
             df = df.drop([df.columns[idx] for idx in [12, 13, 14]], axis=1)
             df.columns = rv.NEW_STOCKS_COLS
             df['code'] = df['code'].map(lambda x : str(x).zfill(6))
-            df['code'] = df['xcode'].map(lambda x : str(x).zfill(6))
+            df['xcode'] = df['xcode'].map(lambda x : str(x).zfill(6))
             res = html.xpath('//table[@class=\"table2\"]/tr[1]/td[1]/a/text()')
             tag = '下一页' if ct.PY3 else unicode('下一页', 'utf-8')
             hasNext = True if tag in res else False 
