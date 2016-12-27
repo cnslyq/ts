@@ -62,6 +62,7 @@ create table invest_new_stock(
 	`id` bigint(20) primary key not null auto_increment,
 	`date` date,
 	`code` varchar(8),
+	`xcode` varchar(8),
 	`name` varchar(16),
 	`ipo_date` date,
 	`issue_date` date,
