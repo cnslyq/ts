@@ -21,6 +21,7 @@ stock | stock history data | stockcode
 
 ####2.2 tsunit \[module] \[freq] \[params]
 freq | desc | params
+----|------|----
 i | data init | /
 d | daily task | date
 w | weekly task | date
