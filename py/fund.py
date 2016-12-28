@@ -1,9 +1,9 @@
 import tushare as ts
 import datetime
-import tslog as pl
-import tsutil as pu
+import tslog as tsl
+import tsutil as tsu
 import pandas as pd
-import tsconf as pc
+import tsconf as tsc
 import multiprocessing
 import os
 
