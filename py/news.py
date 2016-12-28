@@ -32,13 +32,13 @@ def news_real(engine):
 	for i in range(len(df)):
 		if 'blog.sina.com.cn' in urls[i]:
 			continue
-		content = ts.latest_content(urls[i])
-		if content is not None:
-			try:
+		try:
+			content = ts.latest_content(urls[i])
+			if content is not None:
 				contents[i] = unicode(content)#.encode('raw_unicode_escape').decode('utf8')
-			except BaseException, e:
-				print e
-				print urls[i]
+		except BaseException, e:
+			print e
+			print urls[i]
 	df['content'] = contents
 	df = df.sort_values('time')
 	df = df.set_index('time', drop='true')
