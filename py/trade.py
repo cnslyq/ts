@@ -21,7 +21,7 @@ def history(engine, session, sdate, edate):
 		cnt += 1
 		if cnt % tsc.TRADE_PROCESS_NUM is 0:
 			tsl.log("process %i codes" % cnt)
-	trade_block_mult(engine, codes, sdate, edate)
+	trade_block_mult(engine, session, sdate, edate)
 
 def history_stock(engine, session, code):
 	tsl.log("get data for code : " + code + " start...")
@@ -57,13 +57,13 @@ def daily(engine, session, cdate):
 			print e
 			tsl.log("trade_market_today error")
 		
-		codes = tsu.get_stock_codes(session)
-		trade_block_mult(engine, codes, cdate, cdate)
+		trade_block_mult(engine, session, cdate, cdate)
 	else:
 		tsl.log("today is a holiday")
 
-def trade_block_mult(engine, codes, sdate, edate):
+def trade_block_mult(engine, session, sdate, edate):
 	tsl.log("trade_block start...")
+	codes = tsu.get_stock_codes(session)
 	pn = len(codes) / tsc.TRADE_PROCESS_NUM + 1
 	ps = []
 	for i in range(pn):

@@ -8,22 +8,7 @@ import multiprocessing
 import os
 
 def init(engine, session):
-	# get latest codes
-	tsl.log("get latest codes start...")
-	codes = []
-	df = ts.get_nav_open().symbol.values
-	print
-	codes.extend([str(item) for item in df])
-	df = ts.get_nav_close().symbol.values
-	print
-	codes.extend([str(item) for item in df])
-	df = ts.get_nav_grading().symbol.values
-	print
-	codes.extend([str(item) for item in df])
-	tsl.log("get latest codes done")
-	# insert latest info into fund_temp_info
-	session.execute("delete from fund_temp_info")
-	temp_info_mult(engine, codes)
+	temp_info_mult(engine)
 	# update fund_temp_info to fund_info
 	tsl.log("call update_fund_info start...")
 	session.execute('call update_fund_info')
@@ -44,12 +29,12 @@ def quarterly(engine, session, year, quarterly):
 	init(engine, session)
 	
 def history(engine, session, sdate, edate):
-	codes = tsu.get_fund_codes(session)
-	fund_nav_history_mult(engine, codes, str(sdate), str(edate))
+	fund_nav_history_mult(engine, session, str(sdate), str(edate))
 
-def fund_nav_history_mult(engine, codes, sdate, edate):
+def fund_nav_history_mult(engine, session, sdate, edate):
 	tbl = "fund_nav_history"
 	tsl.log(tbl + " start...")
+	codes = tsu.get_fund_codes(session)
 	pn = len(codes) / tsc.FUND_PROCESS_NUM + 1
 	ps = []
 	for i in range(pn):
@@ -93,7 +78,23 @@ def history_fund(engine, session, code):
 	df.to_csv('/home/data/f_' + code + '.csv')
 	tsl.log("get data for code : " + code + " done")
 
-def temp_info_mult(engine, codes):
+def temp_info_mult(engine):
+	# get latest codes
+	tsl.log("get latest codes start...")
+	codes = []
+	df = ts.get_nav_open().symbol.values
+	print
+	codes.extend([str(item) for item in df])
+	df = ts.get_nav_close().symbol.values
+	print
+	codes.extend([str(item) for item in df])
+	df = ts.get_nav_grading().symbol.values
+	print
+	codes.extend([str(item) for item in df])
+	tsl.log("get latest codes done")
+	
+	# insert latest info into fund_temp_info
+	session.execute("delete from fund_temp_info")
 	tsl.log("fund_temp_info start...")
 	pn = len(codes) / tsc.FUND_PROCESS_NUM + 1
 	ps = []
