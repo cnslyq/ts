@@ -1,22 +1,22 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import datetime
-import py.pylog as pl
-import py.pyconfig as pc
+import py.tslog as tsl
+import py.tsconf as tsc
 import sys
 
-INPUT_DICT = {'i':3, 'd':4, 'w':4, 'm':5, 'q':5, 'h':5, 'hm':5, 'hq':5, 'hy':4, 'ha':3, 'r':3}
+INPUT_DICT = {'i':3, 'd':4, 'w':4, 'm':5, 'q':5, 'hd':5, 'hm':5, 'hq':5, 'hy':4, 'ha':3, 'r':3}
 FUNC_DICT = {'i':'init', 'd':'daily', 'w':'weekly', 'm':'month', 'q':'quarterly', 
-			'h':'history', 'hm':'history_m', 'hq':'history_q', 'hy':'history_y', 'ha':'history_a', 'r':'real'}
+			'hd':'history', 'hm':'history_m', 'hq':'history_q', 'hy':'history_y', 'ha':'history_a', 'r':'real'}
 
-engine = create_engine(pc.ENGINE)
+engine = create_engine(tsc.ENGINE)
 Session = sessionmaker(bind=engine)
 session = Session()
 
 names = locals()
 def call(mod, func, argv):
 	st = datetime.datetime.today()
-	pl.log(mod + " " + func + " start...")
+	tsl.log(mod + " " + func + " start...")
 	params = []
 	for param in argv:
 		if len(param) == 8:
@@ -32,11 +32,11 @@ def call(mod, func, argv):
 	method = getattr(obj, func)
 	exec c
 	et = datetime.datetime.today()
-	pl.log(mod + " " + func + " done cost time : " + str(et - st))
+	tsl.log(mod + " " + func + " done cost time : " + str(et - st))
 
 if __name__ == "__main__":
 	if len(sys.argv) < 3:
-		print("please input module(trade/tops/...) and type(i/d/w/m/q/h/hm/hq/hy/ha/r)")
+		print("please input module(trade/tops/...) and type(i/d/w/m/q/hd/hm/hq/hy/ha/r)")
 		sys.exit(1)
 	mod = sys.argv[1]
 	type = sys.argv[2]

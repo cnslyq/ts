@@ -1,15 +1,15 @@
 import tushare as ts
 import datetime
-import pylog as pl
-import pyutil as pu
+import tslog as pl
+import tsutil as pu
 import pandas as pd
-import pyconfig as pc
+import tsconf as pc
 import multiprocessing
 import os
 
 def init(engine, session):
 	# get latest codes
-	pl.log("get latest codes start...")
+	tsl.log("get latest codes start...")
 	codes = []
 	df = ts.get_nav_open().symbol.values
 	print
@@ -20,16 +20,14 @@ def init(engine, session):
 	df = ts.get_nav_grading().symbol.values
 	print
 	codes.extend([str(item) for item in df])
-	pl.log("get latest codes done")
+	tsl.log("get latest codes done")
 	# insert latest info into fund_temp_info
-	# rmcodes = ['37001B', '16162A', '16300L']
 	session.execute("delete from fund_temp_info")
-	print("total %i codes" % len(codes))
 	temp_info_mult(engine, codes)
 	# update fund_temp_info to fund_info
-	pl.log("call update_fund_info start...")
+	tsl.log("call update_fund_info start...")
 	session.execute('call update_fund_info')
-	pl.log("call update_fund_info done")
+	tsl.log("call update_fund_info done")
 	
 def daily(engine, session, cdate):
 	nav_open(engine, cdate)
@@ -46,27 +44,27 @@ def quarterly(engine, session, year, quarterly):
 	init(engine, session)
 	
 def history(engine, session, sdate, edate):
-	codes = pu.get_fund_codes(session)
+	codes = tsu.get_fund_codes(session)
 	fund_nav_history_mult(engine, codes, str(sdate), str(edate))
 
 def fund_nav_history_mult(engine, codes, sdate, edate):
 	tbl = "fund_nav_history"
-	pl.log(tbl + " start...")
-	pn = len(codes) / pc.FUND_PROCESS_NUM + 1
+	tsl.log(tbl + " start...")
+	pn = len(codes) / tsc.FUND_PROCESS_NUM + 1
 	ps = []
 	for i in range(pn):
-		temp = codes[pc.FUND_PROCESS_NUM * i : pc.FUND_PROCESS_NUM * (i + 1)]
+		temp = codes[tsc.FUND_PROCESS_NUM * i : tsc.FUND_PROCESS_NUM * (i + 1)]
 		p = multiprocessing.Process(target = fund_nav_history_worker, args=(engine, temp, sdate, edate))
 		p.daemon = True
 		p.start()
 		ps.append(p)
 	for p in ps:
 		p.join()
-	pl.log(tbl + " done")
+	tsl.log(tbl + " done")
 	
 def fund_nav_history_worker(engine, codes, sdate, edate):
 	pid = os.getpid()
-	pl.log("pid %i start with %i codes..." % (pid, len(codes)))
+	tsl.log("pid %i start with %i codes..." % (pid, len(codes)))
 	temp = []
 	df = pd.DataFrame()
 	for code in codes:
@@ -80,38 +78,38 @@ def fund_nav_history_worker(engine, codes, sdate, edate):
 				temp.append(code)
 			else:
 				print e
-				pl.log("pid %i error for %s" % (pid, code))
+				tsl.log("pid %i error for %s" % (pid, code))
 	if len(df) != 0:
 		df.to_sql('fund_nav_history',engine,if_exists='append')
 	if len(temp) != 0:
 		fund_nav_history_worker(engine, temp, sdate, edate)
-	pl.log("pid %i done with %i codes" % (pid, len(codes)))
+	tsl.log("pid %i done with %i codes" % (pid, len(codes)))
 	
 def history_fund(engine, session, code):
-	pl.log("get data for code : " + code + " start...")
+	tsl.log("get data for code : " + code + " start...")
 	sdate = datetime.date(2013, 1, 1)
 	edate = datetime.date.today()
 	df = ts.get_nav_history(code, start=str(sdate), end=str(edate))
 	df.to_csv('/home/data/f_' + code + '.csv')
-	pl.log("get data for code : " + code + " done")
+	tsl.log("get data for code : " + code + " done")
 
 def temp_info_mult(engine, codes):
-	pl.log("fund_temp_info start...")
-	pn = len(codes) / pc.FUND_PROCESS_NUM + 1
+	tsl.log("fund_temp_info start...")
+	pn = len(codes) / tsc.FUND_PROCESS_NUM + 1
 	ps = []
 	for i in range(pn):
-		temp = codes[pc.FUND_PROCESS_NUM * i : pc.FUND_PROCESS_NUM * (i + 1)]
+		temp = codes[tsc.FUND_PROCESS_NUM * i : tsc.FUND_PROCESS_NUM * (i + 1)]
 		p = multiprocessing.Process(target = temp_info_worker, args=(engine, temp))
 		p.daemon = True
 		p.start()
 		ps.append(p)
 	for p in ps:
 		p.join()
-	pl.log("fund_temp_info done")
+	tsl.log("fund_temp_info done")
 	
 def temp_info_worker(engine, codes):
 	pid = os.getpid()
-	pl.log("pid %i start with %i codes..." % (pid, len(codes)))
+	tsl.log("pid %i start with %i codes..." % (pid, len(codes)))
 	temp = []
 	df = pd.DataFrame()
 	for code in codes:
@@ -123,55 +121,55 @@ def temp_info_worker(engine, codes):
 				temp.append(code)
 			else:
 				print e
-				pl.log("pid %i error for %s" % (pid, code))
+				tsl.log("pid %i error for %s" % (pid, code))
 	if len(df) != 0:
 		df['pid'] = pid
 		df.to_sql('fund_temp_info',engine,if_exists='append')
 	if len(temp) != 0:
 		temp_info_worker(engine, temp)
-	pl.log("pid %i done with %i codes" % (pid, len(codes)))
+	tsl.log("pid %i done with %i codes" % (pid, len(codes)))
 
 def nav_open(engine, cdate):
 	tbl = "fund_nav_open"
-	pl.log(tbl + " start...")
+	tsl.log(tbl + " start...")
 	try:
 		df = ts.get_nav_open()
 		df = df.set_index('symbol', drop='true')
 		df = df[df.nav_date==str(cdate)]
 		df.to_sql(tbl,engine,if_exists='append')
 		print
-		pl.log(tbl + " done")
+		tsl.log(tbl + " done")
 	except BaseException, e:
 		print
 		print e
-		pl.log(tbl + " error")
+		tsl.log(tbl + " error")
 
 def nav_close(engine, cdate):
 	tbl = "fund_nav_close"
-	pl.log(tbl + " start...")
+	tsl.log(tbl + " start...")
 	try:
 		df = ts.get_nav_close()
 		df = df.set_index('symbol', drop='true')
 		df = df[df.nav_date==str(cdate)]
 		df.to_sql(tbl,engine,if_exists='append')
 		print
-		pl.log(tbl + " done")
+		tsl.log(tbl + " done")
 	except BaseException, e:
 		print
 		print e
-		pl.log(tbl + " error")
+		tsl.log(tbl + " error")
 
 def nav_grading(engine, cdate):
 	tbl = "fund_nav_grading"
-	pl.log(tbl + " start...")
+	tsl.log(tbl + " start...")
 	try:
 		df = ts.get_nav_grading()
 		df = df.set_index('symbol', drop='true')
 		df = df[df.nav_date==str(cdate)]
 		df.to_sql(tbl,engine,if_exists='append')
 		print
-		pl.log(tbl + " done")
+		tsl.log(tbl + " done")
 	except BaseException, e:
 		print
 		print e
-		pl.log(tbl + " error")
+		tsl.log(tbl + " error")

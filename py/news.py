@@ -1,9 +1,9 @@
 import tushare as ts
-import pylog as pl
-import pyutil as pu
+import tslog as tsl
+import tsutil as tsu
 import datetime
 import pandas as pd
-import pyconfig as pc
+import tsconf as tsc
 import multiprocessing
 import os
 
@@ -16,7 +16,7 @@ def daily(engine, session, cdate):
 	
 def news_real(engine):
 	tbl = "news_real"
-	pl.log(tbl + " start...")
+	tsl.log(tbl + " start...")
 	df = ts.get_latest_news()
 	st = datetime.datetime.today()
 	et = st - datetime.timedelta(hours=2)
@@ -40,26 +40,26 @@ def news_real(engine):
 	df = df.sort_values('time')
 	df = df.set_index('time', drop='true')
 	df.to_sql(tbl,engine,if_exists='append')
-	pl.log(tbl + " done")
+	tsl.log(tbl + " done")
 	
 def news_notices_mult(engine, session, ddate):
-	pl.log("news_notices start...")
-	codes = pu.get_stock_codes(session)
-	pn = len(codes) / pc.NEWS_PROCESS_NUM + 1
+	tsl.log("news_notices start...")
+	codes = tsu.get_stock_codes(session)
+	pn = len(codes) / tsc.NEWS_PROCESS_NUM + 1
 	ps = []
 	for i in range(pn):
-		temp = codes[pc.NEWS_PROCESS_NUM * i : pc.NEWS_PROCESS_NUM * (i + 1)]
+		temp = codes[tsc.NEWS_PROCESS_NUM * i : tsc.NEWS_PROCESS_NUM * (i + 1)]
 		p = multiprocessing.Process(target = news_notices_worker, args=(engine, temp, ddate))
 		p.daemon = True
 		p.start()
 		ps.append(p)
 	for p in ps:
 		p.join()
-	pl.log("news_notices done")
+	tsl.log("news_notices done")
 	
 def news_notices_worker(engine, codes, ddate):
 	pid = os.getpid()
-	pl.log("pid %i start with %i codes..." % (pid, len(codes)))
+	tsl.log("pid %i start with %i codes..." % (pid, len(codes)))
 	df = pd.DataFrame()
 	for code in codes:
 		try:
@@ -69,17 +69,17 @@ def news_notices_worker(engine, codes, ddate):
 				df = df.append(newdf, ignore_index=True)
 		except BaseException, e:
 			print e
-			pl.log("pid %i error for %s" % (pid, code))
+			tsl.log("pid %i error for %s" % (pid, code))
 	if len(df) != 0:
 		df = df.set_index('code', drop='true')
 		df.to_sql('news_notices',engine,if_exists='append')
-	pl.log("pid %i done with %i codes" % (pid, len(codes)))
+	tsl.log("pid %i done with %i codes" % (pid, len(codes)))
 	
 def news_sina_bar(engine):
 	tbl = "news_sina_bar"
-	pl.log(tbl + " start...")
+	tsl.log(tbl + " start...")
 	df = ts.guba_sina(True)
 	df = df.set_index('ptime', drop='true')
 	df.to_sql(tbl,engine,if_exists='append')
-	pl.log(tbl + " done")
+	tsl.log(tbl + " done")
 	
