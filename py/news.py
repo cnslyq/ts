@@ -18,6 +18,9 @@ def news_real(engine):
 	tbl = "news_real"
 	tsl.log(tbl + " start...")
 	df = ts.get_latest_news()
+	if df is None:
+		tsl.log("no latest news")
+		return
 	st = datetime.datetime.today()
 	et = st - datetime.timedelta(hours=2)
 	st = '%i-%i %02i:00' % (st.month, st.day, st.hour)
