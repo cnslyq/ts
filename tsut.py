@@ -9,7 +9,6 @@ engine = create_engine(tsc.ENGINE)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-names = locals()
 def call(mod, func, argv):
 	st = datetime.datetime.today()
 	tsl.log(mod + " " + func + " start...")
@@ -39,3 +38,4 @@ if __name__ == "__main__":
 	mod = sys.argv[1]
 	func = sys.argv[2]
 	call('py.' + mod, func, sys.argv[3:])
+
