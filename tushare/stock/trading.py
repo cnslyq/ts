@@ -202,7 +202,8 @@ def get_sina_dd(code=None, date=None, vol=400, retry_count=3, pause=0.001):
             if df is not None:
                 df['code'] = df['code'].map(lambda x: x[2:])
         except Exception as e:
-            print(e)
+            # print(e)
+            raise e
         else:
             return df
     raise IOError(ct.NETWORK_URL_ERROR_MSG)

@@ -756,7 +756,8 @@ def top10_holders(code=None, year=None, quarter=None, gdtype='0',
                 df = df[df.quarter == qdate]
                 data = data[data.quarter == qdate]
         except Exception as e:
-            print(e)
+            # print(e)
+            raise e
         else:
             return df, data
     raise IOError(ct.NETWORK_URL_ERROR_MSG)
