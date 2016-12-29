@@ -202,7 +202,7 @@ def get_sina_dd(code=None, date=None, vol=400, retry_count=3, pause=0.001):
             if df is not None:
                 df['code'] = df['code'].map(lambda x: x[2:])
         except Exception as e:
-            raise e
+            print(e)
         else:
             return df
     raise IOError(ct.NETWORK_URL_ERROR_MSG)
@@ -673,6 +673,7 @@ def get_k_data(code=None, start='', end='',
                            ignore_index=True)
     if ktype not in ct.K_MIN_LABELS:
         if ((start is not None) & (start != '')) & ((end is not None) & (end != '')):
+            # check data length
             if len(data) > 0:
                 data = data[(data.date >= start) & (data.date <= end)]
     return data
@@ -749,4 +750,4 @@ def _code_to_symbol(code):
             return ''
         else:
             return 'sh%s'%code if code[:1] in ['5', '6', '9'] else 'sz%s'%code
-        
+  

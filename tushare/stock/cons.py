@@ -71,7 +71,7 @@ KLINE_TT_COLS = ['date', 'open', 'close', 'high', 'low', 'volume']
 TICK_PRICE_URL = '%smarket.%s/%s?date=%s&symbol=%s'
 TODAY_TICKS_PAGE_URL = '%s%s/quotes_service/api/%s/CN_Transactions.getAllPageTime?date=%s&symbol=%s'
 TODAY_TICKS_URL = '%s%s/quotes_service/view/%s?symbol=%s&date=%s&page=%s'
-KLINE_TT_URL = '%sweb.ifzq.%s/appstock/app/%skline/get?_var=kline_day%s&param=%s,%s,%s,%s,380,%s&r=0.%s'
+KLINE_TT_URL = '%sweb.ifzq.%s/appstock/app/%skline/get?_var=kline_day%s&param=%s,%s,%s,%s,640,%s&r=0.%s'
 KLINE_TT_MIN_URL = '%sifzq.%s/appstock/app/kline/mkline?param=%s,m%s,,640&_var=m%s_today&r=0.%s'
 DAY_PRICE_URL = '%sapi.finance.%s/%s/?code=%s&type=last'
 LIVE_DATA_URL = '%shq.%s/rn=%s&list=%s'
@@ -126,6 +126,7 @@ DATA_GETTING_TIPS = '[Getting data:]'
 DATA_GETTING_FLAG = '#'
 DATA_ROWS_TIPS = '%s rows data found.Please wait for a moment.'
 DATA_INPUT_ERROR_MSG = 'date input error.'
+# replace Chinese message with English start
 NETWORK_URL_ERROR_MSG = 'failed to get data, please check the network and URL'
 DATE_CHK_MSG = 'year input error: please input the year number after 1989, format: YYYY'
 DATE_CHK_Q_MSG = 'quarter input error: please input 1, 2, 3 or 4'
@@ -134,6 +135,7 @@ LHB_MSG = 'period input error, please input 5, 10, 30 or 60'
 TOKEN_F_P = 'tk.csv'
 TOKEN_ERR_MSG = 'please setup the token code for TongLian data interface'
 BOX_INPUT_ERR_MSG = 'please input date with format: YYYY-MM'
+# replace Chinese message with English end
 INDEX_SYMBOL = {"399990": "sz399990", "000006": "sh000006", "399998": "sz399998", 
                 "399436": "sz399436", "399678": "sz399678", "399804": "sz399804", 
                 "000104": "sh000104", "000070": "sh000070", "399613": "sz399613", 

@@ -80,13 +80,16 @@ def get_nav_close(fund_type='all', sub_type='all'):
                 1. all      所有封闭型基金
                 2. fbqy     封闭-权益
                 3. fbzq     封闭债券
+
         sub_type:string
             基金子类型:
+
                 1. type=all sub_type无效
                 2. type=fbqy 封闭-权益
                     *all    全部封闭权益
                     *ct     传统封基
                     *cx     创新封基
+
                 3. type=fbzq  封闭债券
                     *all    全部封闭债券
                     *wj     稳健债券型
@@ -135,6 +138,7 @@ def get_nav_grading(fund_type='all', sub_type='all'):
                 1. all      所有分级基金
                 2. fjgs     分级-固收
                 3. fjgg     分级-杠杆
+
         sub_type:string
             基金子类型(type=all sub_type无效):
                 *all    全部分级债券
@@ -176,6 +180,7 @@ def get_nav_grading(fund_type='all', sub_type='all'):
     return fund_df
 
 
+# add ismonetary parameter
 def get_nav_history(code, ismonetary=None, start=None, end=None, retry_count=3, pause=0.001, timeout=10):
     '''
     获取历史净值数据
@@ -205,6 +210,7 @@ def get_nav_history(code, ismonetary=None, start=None, end=None, retry_count=3, 
     end = du.today() if end is None else end
 
     # 判断基金类型
+    # check ismonetary and fund_type
     if ismonetary is None:
         ismonetary = False  # 是否是债券型和货币型基金
         df_fund = get_fund_info(code)
@@ -260,6 +266,7 @@ def get_fund_info(code):
         raise ValueError(status)
     data = org_js['result']['data']
     fund_df = pd.DataFrame(data, columns=ct.FUND_INFO_COLS, index=[0])
+    # remove set index
     # fund_df = fund_df.set_index('symbol')
 
     return fund_df
@@ -322,6 +329,7 @@ def _get_fund_num(url):
 def _get_nav_histroy_num(code, start, end, ismonetary=False):
     """
         获取基金历史净值数量
+
     --------
         货币和证券型基金采用的url不同，需要增加基金类型判断
     """
@@ -362,7 +370,6 @@ def _parse_nav_history_data(code, start, end, nums, ismonetary=False, retry_coun
             request = Request(ct.SINA_NAV_HISTROY_DATA_CUR_URL %
                               (ct.P_TYPE['http'], ct.DOMAINS['ssf'],
                                code, start, end, nums))
-
         else:
             request = Request(ct.SINA_NAV_HISTROY_DATA_URL %
                               (ct.P_TYPE['http'], ct.DOMAINS['ssf'],
@@ -377,9 +384,10 @@ def _parse_nav_history_data(code, start, end, nums, ismonetary=False, retry_coun
             raise ValueError(status)
 
         data = org_js['result']['data']['data']
+        # replace dict type with list
         if isinstance(data, dict):
             data = data.values()
-        
+
         if 'jjjz' in data[0].keys():
             fund_df = pd.DataFrame(data, columns=ct.NAV_HIS_JJJZ)
             fund_df['jjjz'] = fund_df['jjjz'].astype(float)

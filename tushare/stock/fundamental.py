@@ -12,7 +12,6 @@ import lxml.html
 from lxml import etree
 import re
 from pandas.compat import StringIO
-import time
 try:
     from urllib.request import urlopen, Request
 except ImportError:
@@ -263,8 +262,9 @@ def get_growth_data(year, quarter):
             data['code'] = data['code'].map(lambda x:str(x).zfill(6))
         return data
 
-
+# add retry code start
 def _get_growth_data(year, quarter, pageNo, dataArr, retry_count=10, pause=0.01):
+    import time
     ct._write_console()
     for _ in range(retry_count):
         time.sleep(pause)
@@ -294,7 +294,7 @@ def _get_growth_data(year, quarter, pageNo, dataArr, retry_count=10, pause=0.01)
         except Exception as e:
             print(e)
     raise IOError(ct.NETWORK_URL_ERROR_MSG)
-
+# add retry code end
 
 def get_debtpaying_data(year, quarter):
     """

@@ -34,7 +34,9 @@ def get_latest_news(top=None, show_content=False):
         show_content:是否显示新闻内容，默认False
     
     Return
-
+    --------
+        DataFrame
+            classify :新闻类别
             title :新闻标题
             time :发布时间
             url :新闻链接
@@ -167,7 +169,7 @@ def notice_content(url):
         res = html.xpath('//div[@id=\"content\"]/pre/text()')[0]
         return res.strip()
     except Exception as er:
-        print er
+        print(str(er))  
 
 
 def guba_sina(show_content=False):

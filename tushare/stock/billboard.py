@@ -51,6 +51,7 @@ def top_list(date = None, retry_count=3, pause=0.001):
         reason：上榜原因
         date  ：日期
     """
+    # delete hour validation start
     '''
     if date is None:
         if du.get_hour() < 18:
@@ -61,6 +62,7 @@ def top_list(date = None, retry_count=3, pause=0.001):
         if(du.is_holiday(date)):
             return None
     '''
+    # delete hour validation end
     for _ in range(retry_count):
         time.sleep(pause)
         try:
@@ -72,9 +74,11 @@ def top_list(date = None, retry_count=3, pause=0.001):
                                            dict(__getitem__ = lambda s, n:n))())
             text = json.dumps(text)
             text = json.loads(text)
+            # replace space with 0 start
             for item in text['data']:
                 if item['Smoney'] is u'':
                     item['Smoney'] = u'0'
+            # replace space with 0 end
             df = pd.DataFrame(text['data'], columns=rv.LHB_TMP_COLS)
             df.columns = rv.LHB_COLS
             df['buy'] = df['buy'].astype(float)

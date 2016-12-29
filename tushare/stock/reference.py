@@ -115,6 +115,7 @@ def _fun_into(x):
     
     
 def _dist_cotent(year, pageNo, retry_count, pause):
+    # replace lxml.html.parse with urlopen start
     from pandas.io.common import urlopen
     for _ in range(retry_count):
         time.sleep(pause)
@@ -127,6 +128,7 @@ def _dist_cotent(year, pageNo, retry_count, pause):
             with urlopen(url) as resp:
                 lines = resp.read().decode('utf8')
             html=lxml.html.document_fromstring(lines)
+            # replace lxml.html.parse with urlopen end
             res = html.xpath('//div[@class=\"fn_rp_list\"]/table')
             if ct.PY3:
                 sarr = [etree.tostring(node).decode('utf-8') for node in res]
@@ -186,6 +188,7 @@ def forecast_data(year, quarter):
 
 
 def _get_forecast_data(year, quarter, pageNo, dataArr):
+    # replace lxml.html.parse with urlopen start
     from pandas.io.common import urlopen
     ct._write_console()
     try:
@@ -198,6 +201,7 @@ def _get_forecast_data(year, quarter, pageNo, dataArr):
         with urlopen(url) as resp:
             lines = resp.read().decode('gbk')
         html = lxml.html.document_fromstring(lines)
+        # replace lxml.html.parse with urlopen end
         res = html.xpath("//table[@class=\"list_table\"]/tr")
         if ct.PY3:
             sarr = [etree.tostring(node).decode('utf-8') for node in res]
@@ -207,6 +211,7 @@ def _get_forecast_data(year, quarter, pageNo, dataArr):
         sarr = sarr.replace('--', '0')
         sarr = '<table>%s</table>'%sarr
         df = pd.read_html(sarr)[0]
+        # TBD
         if len(df.columns) != 9:
             return dataArr
         df = df.drop([4, 5, 8], axis=1)
@@ -728,6 +733,7 @@ def top10_holders(code=None, year=None, quarter=None, gdtype='0',
             data = pd.DataFrame()
             for row in jss:
                 qt = row['jzrq']
+                # note value process
                 hold = row['ljcy'] if 'ljcy' in row else 0
                 change = row['ljbh'] if 'ljbh' in row else 0
                 props = row['ljzb'] if 'ljzb' in row else 0
@@ -736,6 +742,7 @@ def top10_holders(code=None, year=None, quarter=None, gdtype='0',
                 ls = row['sdgdList']
                 dlist = []
                 for inrow in ls:
+                    # note value process
                     sharetype = inrow['gbxz'] if 'gbxz' in inrow else ''
                     name = inrow['gdmc']
                     hold = inrow['cgs']
@@ -749,7 +756,7 @@ def top10_holders(code=None, year=None, quarter=None, gdtype='0',
                 df = df[df.quarter == qdate]
                 data = data[data.quarter == qdate]
         except Exception as e:
-            raise e
+            print(e)
         else:
             return df, data
     raise IOError(ct.NETWORK_URL_ERROR_MSG)
