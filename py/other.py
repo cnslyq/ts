@@ -4,7 +4,7 @@ import datetime
 
 def daily(engine, session, cdate):
 	futures_ifs(engine, cdate)
-	if cdate.isoweekday != 7:
+	if cdate.isoweekday() != 7:
 		global_index(engine, cdate)
 		day_boxoffice(engine, cdate)
 
