@@ -41,7 +41,7 @@ def is_holiday(date):
 	today = date
 	if isinstance(date, str):
 		today = datetime.datetime.strptime(date, '%Y-%m-%d')
-	return today.isoweekday() in [6, 7] or today in holiday
+	return today.isoweekday() in [6, 7] or str(today) in holiday
 
 def get_ldate(date, diff):
 	ldate = {}

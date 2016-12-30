@@ -2,22 +2,52 @@ import tushare as ts
 import datetime
 import tslog as tsl
 import tsutil as tsu
+import pandas as pd
+import multiprocessing
+import os
 
 def history(engine, session, sdate, edate):
-	cdate = sdate
+	tops_list_mult(engine, sdate, edate)
+	
+def tops_list_mult(engine, sdate, edate):
 	tsl.log("tops_list start...")
+	ps = []
+	dayno = 10
+	pn = (edate - sdate).days / dayno + 1
+	sd = sdate
+	ed = sd + datetime.timedelta(days=dayno-1)
+	for i in range(pn):
+		if i == pn - 1:
+			ed = edate
+		p = multiprocessing.Process(target = tops_list_worker, args=(engine, sd, ed))
+		p.daemon = True
+		p.start()
+		ps.append(p)
+		sd = ed + datetime.timedelta(days=1)
+		ed += datetime.timedelta(days=dayno)
+	for p in ps:
+		p.join()
+	tsl.log("tops_list done")
+	
+def tops_list_worker(engine, sdate, edate):
+	pid = os.getpid()
+	tsl.log("pid %i start with %s ~ %s..." % (pid, str(sdate), str(edate)))
+	cdate = sdate
+	df = pd.DataFrame()
 	while cdate <= edate:
 		if not tsu.is_holiday(cdate):
 			try:
-				df = ts.top_list(str(cdate))
+				newdf = ts.top_list(str(cdate))
 				if df is not None:
-					df = df.set_index('code', drop='true')
-					df.to_sql('tops_list',engine,if_exists='append')
+					df = df.append(newdf, ignore_index=True)
 			except BaseException, e:
 				print e
-				tsl.log("tops_list error on " + str(cdate))
+				tsl.log("pid %i error on %s" % (pid, str(cdate)))
 		cdate += datetime.timedelta(days=1)
-	tsl.log("tops_list done")
+	if len(df) != 0:
+		df = df.set_index('code', drop='true')
+		df.to_sql('tops_list',engine,if_exists='append')
+	tsl.log("pid %i done with %s ~ %s" % (pid, str(sdate), str(edate)))
 
 def weekly(engine, session, cdate):
 	if 5 == cdate.isoweekday():

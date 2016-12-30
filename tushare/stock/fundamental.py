@@ -12,6 +12,7 @@ import lxml.html
 from lxml import etree
 import re
 from pandas.compat import StringIO
+import time
 try:
     from urllib.request import urlopen, Request
 except ImportError:
@@ -82,34 +83,37 @@ def get_report_data(year, quarter):
         return df
 
 
-def _get_report_data(year, quarter, pageNo, dataArr):
+def _get_report_data(year, quarter, pageNo, dataArr, retry_count=10, pause=0.01):
     ct._write_console()
-    try:
-        request = Request(ct.REPORT_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'], ct.PAGES['fd'],
-                         year, quarter, pageNo, ct.PAGE_NUM[1]))
-        text = urlopen(request, timeout=10).read()
-        text = text.decode('GBK')
-        text = text.replace('--', '')
-        html = lxml.html.parse(StringIO(text))
-        res = html.xpath("//table[@class=\"list_table\"]/tr")
-        if ct.PY3:
-            sarr = [etree.tostring(node).decode('utf-8') for node in res]
-        else:
-            sarr = [etree.tostring(node) for node in res]
-        sarr = ''.join(sarr)
-        sarr = '<table>%s</table>'%sarr
-        df = pd.read_html(sarr)[0]
-        df = df.drop(11, axis=1)
-        df.columns = ct.REPORT_COLS
-        dataArr = dataArr.append(df, ignore_index=True)
-        nextPage = html.xpath('//div[@class=\"pages\"]/a[last()]/@onclick')
-        if len(nextPage)>0:
-            pageNo = re.findall(r'\d+', nextPage[0])[0]
-            return _get_report_data(year, quarter, pageNo, dataArr)
-        else:
-            return dataArr
-    except Exception as e:
-        print(e)
+    for _ in range(retry_count):
+        time.sleep(pause)
+        try:
+            request = Request(ct.REPORT_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'], ct.PAGES['fd'],
+                             year, quarter, pageNo, ct.PAGE_NUM[1]))
+            text = urlopen(request, timeout=10).read()
+            text = text.decode('GBK')
+            text = text.replace('--', '')
+            html = lxml.html.parse(StringIO(text))
+            res = html.xpath("//table[@class=\"list_table\"]/tr")
+            if ct.PY3:
+                sarr = [etree.tostring(node).decode('utf-8') for node in res]
+            else:
+                sarr = [etree.tostring(node) for node in res]
+            sarr = ''.join(sarr)
+            sarr = '<table>%s</table>'%sarr
+            df = pd.read_html(sarr)[0]
+            df = df.drop(11, axis=1)
+            df.columns = ct.REPORT_COLS
+            dataArr = dataArr.append(df, ignore_index=True)
+            nextPage = html.xpath('//div[@class=\"pages\"]/a[last()]/@onclick')
+            if len(nextPage)>0:
+                pageNo = re.findall(r'\d+', nextPage[0])[0]
+                return _get_report_data(year, quarter, pageNo, dataArr)
+            else:
+                return dataArr
+        except Exception as e:
+            print(e)
+    raise IOError(ct.NETWORK_URL_ERROR_MSG)
 
 
 def get_profit_data(year, quarter):
@@ -143,34 +147,37 @@ def get_profit_data(year, quarter):
         return data
 
 
-def _get_profit_data(year, quarter, pageNo, dataArr):
+def _get_profit_data(year, quarter, pageNo, dataArr, retry_count=10, pause=0.01):
     ct._write_console()
-    try:
-        request = Request(ct.PROFIT_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'],
-                                              ct.PAGES['fd'], year,
-                                              quarter, pageNo, ct.PAGE_NUM[1]))
-        text = urlopen(request, timeout=10).read()
-        text = text.decode('GBK')
-        text = text.replace('--', '')
-        html = lxml.html.parse(StringIO(text))
-        res = html.xpath("//table[@class=\"list_table\"]/tr")
-        if ct.PY3:
-            sarr = [etree.tostring(node).decode('utf-8') for node in res]
-        else:
-            sarr = [etree.tostring(node) for node in res]
-        sarr = ''.join(sarr)
-        sarr = '<table>%s</table>'%sarr
-        df = pd.read_html(sarr)[0]
-        df.columns=ct.PROFIT_COLS
-        dataArr = dataArr.append(df, ignore_index=True)
-        nextPage = html.xpath('//div[@class=\"pages\"]/a[last()]/@onclick')
-        if len(nextPage)>0:
-            pageNo = re.findall(r'\d+', nextPage[0])[0]
-            return _get_profit_data(year, quarter, pageNo, dataArr)
-        else:
-            return dataArr
-    except:
-        pass
+    for _ in range(retry_count):
+        time.sleep(pause)
+        try:
+            request = Request(ct.PROFIT_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'],
+                                                  ct.PAGES['fd'], year,
+                                                  quarter, pageNo, ct.PAGE_NUM[1]))
+            text = urlopen(request, timeout=10).read()
+            text = text.decode('GBK')
+            text = text.replace('--', '')
+            html = lxml.html.parse(StringIO(text))
+            res = html.xpath("//table[@class=\"list_table\"]/tr")
+            if ct.PY3:
+                sarr = [etree.tostring(node).decode('utf-8') for node in res]
+            else:
+                sarr = [etree.tostring(node) for node in res]
+            sarr = ''.join(sarr)
+            sarr = '<table>%s</table>'%sarr
+            df = pd.read_html(sarr)[0]
+            df.columns=ct.PROFIT_COLS
+            dataArr = dataArr.append(df, ignore_index=True)
+            nextPage = html.xpath('//div[@class=\"pages\"]/a[last()]/@onclick')
+            if len(nextPage)>0:
+                pageNo = re.findall(r'\d+', nextPage[0])[0]
+                return _get_profit_data(year, quarter, pageNo, dataArr)
+            else:
+                return dataArr
+        except Exception as e:
+            print(e)
+    raise IOError(ct.NETWORK_URL_ERROR_MSG)
 
 
 def get_operation_data(year, quarter):
@@ -203,34 +210,37 @@ def get_operation_data(year, quarter):
         return data
 
 
-def _get_operation_data(year, quarter, pageNo, dataArr):
+def _get_operation_data(year, quarter, pageNo, dataArr, retry_count=10, pause=0.01):
     ct._write_console()
-    try:
-        request = Request(ct.OPERATION_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'],
-                                                 ct.PAGES['fd'], year,
-                                                 quarter, pageNo, ct.PAGE_NUM[1]))
-        text = urlopen(request, timeout=10).read()
-        text = text.decode('GBK')
-        text = text.replace('--', '')
-        html = lxml.html.parse(StringIO(text))
-        res = html.xpath("//table[@class=\"list_table\"]/tr")
-        if ct.PY3:
-            sarr = [etree.tostring(node).decode('utf-8') for node in res]
-        else:
-            sarr = [etree.tostring(node) for node in res]
-        sarr = ''.join(sarr)
-        sarr = '<table>%s</table>'%sarr
-        df = pd.read_html(sarr)[0]
-        df.columns=ct.OPERATION_COLS
-        dataArr = dataArr.append(df, ignore_index=True)
-        nextPage = html.xpath('//div[@class=\"pages\"]/a[last()]/@onclick')
-        if len(nextPage)>0:
-            pageNo = re.findall(r'\d+', nextPage[0])[0]
-            return _get_operation_data(year, quarter, pageNo, dataArr)
-        else:
-            return dataArr
-    except Exception as e:
-        print(e)
+    for _ in range(retry_count):
+        time.sleep(pause)
+        try:
+            request = Request(ct.OPERATION_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'],
+                                                     ct.PAGES['fd'], year,
+                                                     quarter, pageNo, ct.PAGE_NUM[1]))
+            text = urlopen(request, timeout=10).read()
+            text = text.decode('GBK')
+            text = text.replace('--', '')
+            html = lxml.html.parse(StringIO(text))
+            res = html.xpath("//table[@class=\"list_table\"]/tr")
+            if ct.PY3:
+                sarr = [etree.tostring(node).decode('utf-8') for node in res]
+            else:
+                sarr = [etree.tostring(node) for node in res]
+            sarr = ''.join(sarr)
+            sarr = '<table>%s</table>'%sarr
+            df = pd.read_html(sarr)[0]
+            df.columns=ct.OPERATION_COLS
+            dataArr = dataArr.append(df, ignore_index=True)
+            nextPage = html.xpath('//div[@class=\"pages\"]/a[last()]/@onclick')
+            if len(nextPage)>0:
+                pageNo = re.findall(r'\d+', nextPage[0])[0]
+                return _get_operation_data(year, quarter, pageNo, dataArr)
+            else:
+                return dataArr
+        except Exception as e:
+            print(e)
+    raise IOError(ct.NETWORK_URL_ERROR_MSG)
 
 
 def get_growth_data(year, quarter):
@@ -264,7 +274,6 @@ def get_growth_data(year, quarter):
 
 # add retry code start
 def _get_growth_data(year, quarter, pageNo, dataArr, retry_count=10, pause=0.01):
-    import time
     ct._write_console()
     for _ in range(retry_count):
         time.sleep(pause)
@@ -326,33 +335,36 @@ def get_debtpaying_data(year, quarter):
         return df
 
 
-def _get_debtpaying_data(year, quarter, pageNo, dataArr):
+def _get_debtpaying_data(year, quarter, pageNo, dataArr, retry_count=10, pause=0.01):
     ct._write_console()
-    try:
-        request = Request(ct.DEBTPAYING_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'],
-                                                  ct.PAGES['fd'], year,
-                                                  quarter, pageNo, ct.PAGE_NUM[1]))
-        text = urlopen(request, timeout=10).read()
-        text = text.decode('GBK')
-        html = lxml.html.parse(StringIO(text))
-        res = html.xpath("//table[@class=\"list_table\"]/tr")
-        if ct.PY3:
-            sarr = [etree.tostring(node).decode('utf-8') for node in res]
-        else:
-            sarr = [etree.tostring(node) for node in res]
-        sarr = ''.join(sarr)
-        sarr = '<table>%s</table>'%sarr
-        df = pd.read_html(sarr)[0]
-        df.columns = ct.DEBTPAYING_COLS
-        dataArr = dataArr.append(df, ignore_index=True)
-        nextPage = html.xpath('//div[@class=\"pages\"]/a[last()]/@onclick')
-        if len(nextPage)>0:
-            pageNo = re.findall(r'\d+', nextPage[0])[0]
-            return _get_debtpaying_data(year, quarter, pageNo, dataArr)
-        else:
-            return dataArr
-    except Exception as e:
-        print(e)
+    for _ in range(retry_count):
+        time.sleep(pause)
+        try:
+            request = Request(ct.DEBTPAYING_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'],
+                                                      ct.PAGES['fd'], year,
+                                                      quarter, pageNo, ct.PAGE_NUM[1]))
+            text = urlopen(request, timeout=10).read()
+            text = text.decode('GBK')
+            html = lxml.html.parse(StringIO(text))
+            res = html.xpath("//table[@class=\"list_table\"]/tr")
+            if ct.PY3:
+                sarr = [etree.tostring(node).decode('utf-8') for node in res]
+            else:
+                sarr = [etree.tostring(node) for node in res]
+            sarr = ''.join(sarr)
+            sarr = '<table>%s</table>'%sarr
+            df = pd.read_html(sarr)[0]
+            df.columns = ct.DEBTPAYING_COLS
+            dataArr = dataArr.append(df, ignore_index=True)
+            nextPage = html.xpath('//div[@class=\"pages\"]/a[last()]/@onclick')
+            if len(nextPage)>0:
+                pageNo = re.findall(r'\d+', nextPage[0])[0]
+                return _get_debtpaying_data(year, quarter, pageNo, dataArr)
+            else:
+                return dataArr
+        except Exception as e:
+            print(e)
+    raise IOError(ct.NETWORK_URL_ERROR_MSG)
  
  
 def get_cashflow_data(year, quarter):
@@ -384,34 +396,37 @@ def get_cashflow_data(year, quarter):
         return df
 
 
-def _get_cashflow_data(year, quarter, pageNo, dataArr):
+def _get_cashflow_data(year, quarter, pageNo, dataArr, retry_count=10, pause=0.01):
     ct._write_console()
-    try:
-        request = Request(ct.CASHFLOW_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'],
-                                                ct.PAGES['fd'], year,
-                                                quarter, pageNo, ct.PAGE_NUM[1]))
-        text = urlopen(request, timeout=10).read()
-        text = text.decode('GBK')
-        text = text.replace('--', '')
-        html = lxml.html.parse(StringIO(text))
-        res = html.xpath("//table[@class=\"list_table\"]/tr")
-        if ct.PY3:
-            sarr = [etree.tostring(node).decode('utf-8') for node in res]
-        else:
-            sarr = [etree.tostring(node) for node in res]
-        sarr = ''.join(sarr)
-        sarr = '<table>%s</table>'%sarr
-        df = pd.read_html(sarr)[0]
-        df.columns = ct.CASHFLOW_COLS
-        dataArr = dataArr.append(df, ignore_index=True)
-        nextPage = html.xpath('//div[@class=\"pages\"]/a[last()]/@onclick')
-        if len(nextPage)>0:
-            pageNo = re.findall(r'\d+', nextPage[0])[0]
-            return _get_cashflow_data(year, quarter, pageNo, dataArr)
-        else:
-            return dataArr
-    except Exception as e:
-        print(e)
+    for _ in range(retry_count):
+        time.sleep(pause)
+        try:
+            request = Request(ct.CASHFLOW_URL%(ct.P_TYPE['http'], ct.DOMAINS['vsf'],
+                                                    ct.PAGES['fd'], year,
+                                                    quarter, pageNo, ct.PAGE_NUM[1]))
+            text = urlopen(request, timeout=10).read()
+            text = text.decode('GBK')
+            text = text.replace('--', '')
+            html = lxml.html.parse(StringIO(text))
+            res = html.xpath("//table[@class=\"list_table\"]/tr")
+            if ct.PY3:
+                sarr = [etree.tostring(node).decode('utf-8') for node in res]
+            else:
+                sarr = [etree.tostring(node) for node in res]
+            sarr = ''.join(sarr)
+            sarr = '<table>%s</table>'%sarr
+            df = pd.read_html(sarr)[0]
+            df.columns = ct.CASHFLOW_COLS
+            dataArr = dataArr.append(df, ignore_index=True)
+            nextPage = html.xpath('//div[@class=\"pages\"]/a[last()]/@onclick')
+            if len(nextPage)>0:
+                pageNo = re.findall(r'\d+', nextPage[0])[0]
+                return _get_cashflow_data(year, quarter, pageNo, dataArr)
+            else:
+                return dataArr
+        except Exception as e:
+            print(e)
+    raise IOError(ct.NETWORK_URL_ERROR_MSG)
        
        
 def _data_path():

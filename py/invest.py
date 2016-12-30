@@ -12,11 +12,14 @@ def history(engine, session, sdate, edate):
 	margin_sh_smry(engine, str(sdate), str(edate))
 	margin_sh_dtl(engine, str(sdate), str(edate))
 	margin_sz_smry(engine, str(sdate), str(edate))
+	tbl = "invest_margin_sz_dtl"
+	tsl.log(tbl + " start...")
 	cdate = sdate
 	while cdate <= edate:
 		if not tsu.is_holiday(cdate):
-			margin_sz_dtl(engine, str(cdate), log=False)
+			margin_sz_dtl(engine, str(cdate))
 		cdate += datetime.timedelta(days=1)
+	tsl.log(tbl + " done")
 	
 def history_m(engine, session, year, month):
 	lifted(engine, year, month)
@@ -38,7 +41,10 @@ def daily(engine, session, cdate):
 		margin_sh_smry(engine, ddate, ddate)
 		margin_sh_dtl(engine, ddate, ddate)
 		margin_sz_smry(engine, ddate, ddate)
+		tbl = "invest_margin_sz_dtl"
+		tsl.log(tbl + " start...")
 		margin_sz_dtl(engine, ddate)
+		tsl.log(tbl + " done")
 	else:
 		tsl.log("yesterday is a holiday")
 	
@@ -117,8 +123,10 @@ def margin_sh_dtl(engine, sdate, edate):
 		df = ts.sh_margin_details(start=sdate, end=edate)
 		df = df.set_index('opDate', drop='true')
 		df.to_sql(tbl,engine,if_exists='append')
+		print
 		tsl.log(tbl + " done")
 	except BaseException, e:
+		print
 		print e
 		tsl.log(tbl + " error")
 		
@@ -136,19 +144,15 @@ def margin_sz_smry(engine, sdate, edate):
 		print e
 		tsl.log(tbl + " error")
 		
-def margin_sz_dtl(engine, ddate, log=True):
+def margin_sz_dtl(engine, ddate):
 	tbl = "invest_margin_sz_dtl"
-	if(log):
-		tsl.log(tbl + " start...")
 	try:
 		df = ts.sz_margin_details(ddate)
 		df = df.set_index('opDate', drop='true')
 		df.to_sql(tbl,engine,if_exists='append')
-		if(log):
-			tsl.log(tbl + " done")
 	except BaseException, e:
 		print e
-		tsl.log(tbl + " error")
+		tsl.log(tbl + " error on " + ddate)
 		
 def lifted(engine, year, month):
 	# tsu.to_sql(engine, 'invest_lifted', plist=[year, month])

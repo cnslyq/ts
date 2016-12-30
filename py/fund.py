@@ -8,7 +8,7 @@ import multiprocessing
 import os
 
 def init(engine, session):
-	temp_info_mult(engine)
+	temp_info_mult(engine, session)
 	# update fund_temp_info to fund_info
 	tsl.log("call update_fund_info start...")
 	session.execute('call update_fund_info')
@@ -78,7 +78,7 @@ def history_fund(engine, session, code):
 	df.to_csv('/home/data/f_' + code + '.csv')
 	tsl.log("get data for code : " + code + " done")
 
-def temp_info_mult(engine):
+def temp_info_mult(engine, session):
 	# get latest codes
 	tsl.log("get latest codes start...")
 	codes = []

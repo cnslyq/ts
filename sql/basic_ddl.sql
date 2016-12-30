@@ -35,7 +35,7 @@ create table basic_performance(
 	`quarter` int(1),
 	`code` varchar(8),
 	`name` varchar(16),
-	`esp` double,
+	`eps` double,
 	`eps_yoy` double,
 	`bvps` double,
 	`roe` double,
@@ -60,7 +60,7 @@ create table basic_profit(
 	`net_profit_ratio` double,
 	`gross_profit_rate` double,
 	`net_profits` double,
-	`esp` double,
+	`eps` double,
 	`business_income` double,
 	`bips` double,
 	`create_date` timestamp not null default CURRENT_TIMESTAMP
