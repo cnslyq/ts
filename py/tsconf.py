@@ -2,10 +2,11 @@ ENGINE = 'mysql://root:123456@127.0.0.1/test?charset=utf8'
 
 INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq', 'hy', 'ha', 'hs', 'real']
 INIT_LIST = ['py.stock', 'py.macro', 'py.fund']
-HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest', 'py.fund']
+# HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest', 'py.fund']
+HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest']
 DAILY_LIST = ['py.trade', 'py.invest', 'py.fund', 'py.other', 'py.news']
 WEEKLY_LIST = ['py.tops', 'py.invest']
-MONTHLY_LIST = ['py.stock', 'py.macro', 'py.tops', 'py.invest', 'py.basic', 'py.fund', 'py.other']
+MONTHLY_LIST = ['py.trade', 'py.stock', 'py.macro', 'py.tops', 'py.invest', 'py.basic', 'py.fund', 'py.other']
 QUARTERLY_LIST = ['py.invest', 'py.basic', 'py.fund']
 HISTORY_M_LIST = ['py.invest', 'py.other']
 HISTORY_Q_LIST = ['py.invest', 'py.basic']

@@ -12,6 +12,11 @@ def history(engine, session, sdate, edate):
 	# it takes too much time...
 	# trade_block_mult(engine, session, sdate, edate)
 
+def monthly(engine, session, year, month):
+	sdate=datetime.date(year, month, 1)
+	edate=datetime.date.today() - datetime.timedelta(days=1)
+	history(engine, session, sdate, edate)
+
 def history_stock(engine, session, code):
 	tsl.log("get data for code : " + code + " start...")
 	sdate = datetime.date(2013, 1, 1)
