@@ -46,7 +46,7 @@ def is_holiday(date):
 def get_ldate(date, diff):
 	ldate = {}
 	ldate["year"] = date.year
-	ldate["month"] = date.month - diff
+	ldate["month"] = date.month + diff
 	if ldate["month"] <= 0:
 		ldate["year"] -= 1
 		ldate["month"] += 12

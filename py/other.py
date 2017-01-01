@@ -4,12 +4,12 @@ import datetime
 
 def daily(engine, session, cdate):
 	futures_ifs(engine, cdate)
-	if cdate.isoweekday() != 7:
+	if cdate.isoweekday != 7:
 		global_index(engine, cdate)
 		day_boxoffice(engine, cdate)
 
 def history_m(engine, session, year, month):
-	ddate='%i-%i' % (year, month)
+	ddate='%i-%.2i' % (year, month)
 	month_boxoffice(engine, ddate)
 
 def history_y(engine, session, year):
@@ -26,7 +26,8 @@ def monthly(engine, session, year, month):
 	shibor_ma(engine, year, sdate)
 	lpr(engine, year, sdate)
 	lpr_ma(engine, year, sdate)
-	month_boxoffice(engine)
+	ddate='%i-%.2i' % (year, month)
+	month_boxoffice(engine, ddate)
 
 def day_boxoffice(engine, cdate):
 	tbl = "day_boxoffice"

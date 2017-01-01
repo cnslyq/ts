@@ -20,11 +20,10 @@ def stock(engine):
 	tsl.log(tbl + " start...")
 	try:
 		df = ts.get_stock_basics()
+		df = df.reset_index()
 		df.to_sql(tbl,engine,if_exists='replace')
-		print
 		tsl.log(tbl + " done")
 	except BaseException, e:
-		print
 		print e
 		tsl.log(tbl + " error")
 

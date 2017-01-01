@@ -6,7 +6,7 @@ import py.tsconf as tsc
 import sys
 
 INPUT_DICT = {'i':3, 'd':4, 'w':4, 'm':5, 'q':5, 'hd':5, 'hm':5, 'hq':5, 'hy':4, 'ha':3, 'r':3}
-FUNC_DICT = {'i':'init', 'd':'daily', 'w':'weekly', 'm':'month', 'q':'quarterly', 
+FUNC_DICT = {'i':'init', 'd':'daily', 'w':'weekly', 'm':'monthly', 'q':'quarterly', 
 			'hd':'history', 'hm':'history_m', 'hq':'history_q', 'hy':'history_y', 'ha':'history_a', 'r':'real'}
 
 engine = create_engine(tsc.ENGINE)
