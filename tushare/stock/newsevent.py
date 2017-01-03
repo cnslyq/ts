@@ -97,8 +97,9 @@ def latest_content(url, retry_count=10, pause=0.01):
             content = html_content.text_content()
             return content
         except Exception as er:
-            print url
-            print(str(er))
+            # print url
+            # print(str(er))
+            pass
     raise IOError(ct.NETWORK_URL_ERROR_MSG)
 
 
