@@ -24,7 +24,7 @@ except ImportError:
 
 
 
-def get_latest_news(top=None, show_content=False):
+def get_latest_news(top=None, show_content=False, retry_count=10, pause=0.01):
     """
         获取即时财经新闻
     
@@ -42,31 +42,34 @@ def get_latest_news(top=None, show_content=False):
             url :新闻链接
             content:新闻内容（在show_content为True的情况下出现）
     """
-    top = ct.PAGE_NUM[2] if top is None else top
-    try:
-        request = Request(nv.LATEST_URL % (ct.P_TYPE['http'], ct.DOMAINS['sina'],
-                                                   ct.PAGES['lnews'], top,
-                                                   _random()))
-        data_str = urlopen(request, timeout=10).read()
-        data_str = data_str.decode('GBK')
-        data_str = data_str.split('=')[1][:-1]
-        data_str = eval(data_str, type('Dummy', (dict,), 
-                                       dict(__getitem__ = lambda s, n:n))())
-        data_str = json.dumps(data_str)
-        data_str = json.loads(data_str)
-        data_str = data_str['list']
-        data = []
-        for r in data_str:
-            rt = datetime.fromtimestamp(r['time'])
-            rtstr = datetime.strftime(rt, "%m-%d %H:%M")
-            arow = [r['channel']['title'], r['title'], rtstr, r['url']]
-            if show_content:
-                arow.append(latest_content(r['url']))
-            data.append(arow)
-        df = pd.DataFrame(data, columns=nv.LATEST_COLS_C if show_content else nv.LATEST_COLS)
-        return df
-    except Exception as er:
-        print(str(er))
+    for _ in range(retry_count):
+        time.sleep(pause)
+        top = ct.PAGE_NUM[2] if top is None else top
+        try:
+            request = Request(nv.LATEST_URL % (ct.P_TYPE['http'], ct.DOMAINS['sina'],
+                                                       ct.PAGES['lnews'], top,
+                                                       _random()))
+            data_str = urlopen(request, timeout=10).read()
+            data_str = data_str.decode('GBK')
+            data_str = data_str.split('=')[1][:-1]
+            data_str = eval(data_str, type('Dummy', (dict,), 
+                                           dict(__getitem__ = lambda s, n:n))())
+            data_str = json.dumps(data_str)
+            data_str = json.loads(data_str)
+            data_str = data_str['list']
+            data = []
+            for r in data_str:
+                rt = datetime.fromtimestamp(r['time'])
+                rtstr = datetime.strftime(rt, "%m-%d %H:%M")
+                arow = [r['channel']['title'], r['title'], rtstr, r['url']]
+                if show_content:
+                    arow.append(latest_content(r['url']))
+                data.append(arow)
+            df = pd.DataFrame(data, columns=nv.LATEST_COLS_C if show_content else nv.LATEST_COLS)
+            return df
+        except Exception as er:
+            print('get_latest_news error : ' + str(er))
+    raise IOError(ct.NETWORK_URL_ERROR_MSG)
 
 def latest_content(url, retry_count=10, pause=0.01):
     '''

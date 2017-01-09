@@ -23,8 +23,8 @@ def news_real(engine):
 		return
 	st = datetime.datetime.today()
 	et = st - datetime.timedelta(hours=2)
-	st = '%i-%i %02i:00' % (st.month, st.day, st.hour)
-	et = '%i-%i %02i:00' % (et.month, et.day, et.hour)
+	st = '%02i-%02i %02i:00' % (st.month, st.day, st.hour)
+	et = '%02i-%02i %02i:00' % (et.month, et.day, et.hour)
 	df = df[df.time >= et]
 	df = df[df.time < st]
 	urls = df.url.values
