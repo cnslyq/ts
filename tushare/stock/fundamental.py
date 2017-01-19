@@ -19,12 +19,9 @@ try:
 except ImportError:
     from urllib2 import urlopen, Request
 
-def get_stock_basics(date=None):
+def get_stock_basics():
     """
         获取沪深上市公司基本情况
-    Parameters
-    date:日期YYYY-MM-DD，默认为上一个交易日，目前只能提供2016-08-09之后的历史数据
-
     Return
     --------
     DataFrame
@@ -45,12 +42,7 @@ def get_stock_basics(date=None):
                pb,市净率
                timeToMarket,上市日期
     """
-    wdate = du.last_tddate() if date is None else date
-    wdate = wdate.replace('-', '')
-    if wdate < '20160809':
-        return None
-    datepre = '' if date is None else wdate[0:4] + wdate[4:6] + '/'
-    request = Request(ct.ALL_STOCK_BASICS_FILE%(datepre, '' if date is None else wdate))
+    request = Request(ct.ALL_STOCK_BASICS_FILE)
     text = urlopen(request, timeout=10).read()
     text = text.decode('GBK')
     text = text.replace('--', '')
