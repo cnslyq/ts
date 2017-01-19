@@ -75,6 +75,12 @@ def init(engine, session):
 	df.to_sql(tbl,engine,if_exists='replace')
 	tsl.log(tbl + " done")
 	
+	tbl = "gold_and_foreign_reserves"
+	tsl.log(tbl + " start...")
+	df = ts.get_gold_and_foreign_reserves()
+	df.to_sql(tbl,engine,if_exists='replace')
+	tsl.log(tbl + " done")
+	
 
 def monthly(engine, session, year, month):
 	init(engine, session)

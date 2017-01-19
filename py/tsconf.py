@@ -1,6 +1,6 @@
 ENGINE = 'mysql://root:123456@127.0.0.1/test?charset=utf8'
 
-INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq', 'hy', 'ha', 'hs', 'real']
+INPUT_LIST = ['init', 'hist', 'cron', 'hm', 'hq', 'hy', 'ha', 'real', 'stock', 'fund']
 INIT_LIST = ['py.stock', 'py.macro', 'py.fund']
 # HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest', 'py.fund']
 HISTORY_LIST = ['py.trade', 'py.tops', 'py.invest']
