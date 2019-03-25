@@ -16,6 +16,7 @@ def daily(engine, session, cdate):
 	
 def news_real(engine):
 	tbl = "news_real"
+	cnt = 0
 	tsl.log(tbl + " start...")
 	df = ts.get_latest_news()
 	if df is None:
@@ -36,6 +37,7 @@ def news_real(engine):
 			content = ts.latest_content(urls[i])
 			if content is not None:
 				contents[i] = unicode(content)#.encode('raw_unicode_escape').decode('utf8')
+				cnt += 1
 		except BaseException, e:
 			print e
 			print urls[i]
@@ -43,6 +45,7 @@ def news_real(engine):
 	df = df.sort_values('time')
 	df = df.set_index('time', drop='true')
 	df.to_sql(tbl,engine,if_exists='append')
+	tsl.log(str(cnt) + " news were inserted")
 	tsl.log(tbl + " done")
 	
 def news_notices_mult(engine, session, ddate):
